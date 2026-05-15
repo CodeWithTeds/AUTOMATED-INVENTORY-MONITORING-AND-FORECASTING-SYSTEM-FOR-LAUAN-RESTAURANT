@@ -6,7 +6,6 @@ use App\Enums\InventoryCategory;
 use App\Enums\InventoryItemStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class InventoryItemResource extends JsonResource
 {
@@ -50,7 +49,7 @@ class InventoryItemResource extends JsonResource
             'status' => $status?->value ?? $this->status,
             'status_label' => $status?->label() ?? $this->status,
             'stock_state' => $stockState,
-            'image_url' => $this->image_path ? Storage::disk('public')->url($this->image_path) : null,
+            'image_url' => $this->image_path ? "/storage/{$this->image_path}" : null,
             'notes' => $this->notes,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),

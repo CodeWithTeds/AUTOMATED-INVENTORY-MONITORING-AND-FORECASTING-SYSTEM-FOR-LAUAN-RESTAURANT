@@ -62,12 +62,6 @@ export default function Welcome() {
                     </Link>
 
                     <div className="flex items-center gap-3 text-sm font-medium">
-                        <a href="#system" className="hidden text-[#040404]/70 sm:inline">
-                            System
-                        </a>
-                        <a href="#operations" className="hidden text-[#040404]/70 sm:inline">
-                            Operations
-                        </a>
                         <Link
                             href={href}
                             className="inline-flex items-center gap-2 rounded-md bg-[#040404] px-4 py-2 text-white shadow-[0_16px_40px_rgba(4,4,4,0.18)] transition hover:bg-[#2a211c]"
@@ -82,7 +76,7 @@ export default function Welcome() {
                     <div className="max-w-3xl">
                         <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#040404]/10 bg-white/70 px-3 py-1.5 text-sm text-[#040404]/70 shadow-sm">
                             <Sparkles className="size-4 text-[#faa340]" />
-                            Apple-inspired restaurant operations
+                            restaurant operations
                         </div>
                         <h1 className="text-5xl font-semibold leading-[1.02] sm:text-6xl lg:text-7xl">
                             Lauan Restaurant

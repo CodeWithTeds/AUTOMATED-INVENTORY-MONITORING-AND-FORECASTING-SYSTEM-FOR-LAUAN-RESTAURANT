@@ -20,5 +20,7 @@ class DatabaseSeeder extends Seeder
             'email' => env('DEFAULT_ADMIN_EMAIL', 'admin@aimfs.test'),
             'password' => env('DEFAULT_ADMIN_PASSWORD', 'password'),
         ]);
+
+        $this->call(InventoryItemSeeder::class);
     }
 }

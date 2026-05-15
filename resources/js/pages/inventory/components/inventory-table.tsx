@@ -186,9 +186,7 @@ export function InventoryTable({
                                 />
                             </th>
                             <th className="px-2 py-1.5">Status</th>
-                            <th className="sticky right-0 px-2 py-1.5 text-right">
-                                Actions
-                            </th>
+                            <th className="px-2 py-1.5 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -268,7 +266,7 @@ export function InventoryTable({
                                         </span>
                                     </div>
                                 </td>
-                                <td className="sticky right-0 px-2 py-1 text-right">
+                                <td className="px-2 py-1 text-right">
                                     <div className="flex justify-end gap-1">
                                         <button
                                             type="button"

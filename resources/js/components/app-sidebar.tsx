@@ -1,5 +1,16 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import {
+    BarChart3,
+    BookOpen,
+    Boxes,
+    ClipboardList,
+    CookingPot,
+    LayoutGrid,
+    ReceiptText,
+    ShoppingBag,
+    Truck,
+    Utensils,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -22,14 +33,49 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Inventory',
+        href: dashboard(),
+        icon: Boxes,
+    },
+    {
+        title: 'Production',
+        href: dashboard(),
+        icon: CookingPot,
+    },
+    {
+        title: 'Menu & Recipe',
+        href: dashboard(),
+        icon: Utensils,
+    },
+    {
+        title: 'Sales',
+        href: dashboard(),
+        icon: ReceiptText,
+    },
+    {
+        title: 'Forecasting',
+        href: dashboard(),
+        icon: BarChart3,
+    },
+    {
+        title: 'Supplier',
+        href: dashboard(),
+        icon: Truck,
+    },
+    {
+        title: 'Purchase Orders',
+        href: dashboard(),
+        icon: ShoppingBag,
+    },
+    {
+        title: 'Reports',
+        href: dashboard(),
+        icon: ClipboardList,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
     {
         title: 'Documentation',
         href: 'https://laravel.com/docs/starter-kits#react',

@@ -18,13 +18,25 @@ class LoginRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, array<int, ValidationRule|string>>
      */
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
-            'password' => 'required',
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+            'remember' => ['sometimes', 'boolean'],
+        ];
+    }
+
+    /**
+     * @return array{email: string, password: string}
+     */
+    public function credentials(): array
+    {
+        return [
+            'email' => $this->string('email')->lower()->toString(),
+            'password' => $this->string('password')->toString(),
         ];
     }
 }

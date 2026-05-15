@@ -31,8 +31,8 @@ export default function Login({ status, canResetPassword }: Props) {
             <Head title="Log in" />
 
             <main className="relative flex min-h-screen overflow-hidden bg-[#f7f1ea] text-[#040404]">
-                <div className="absolute left-[-8%] top-[52%] h-14 w-[32%] -rotate-8 bg-[#faa340]" />
-                <div className="absolute right-[-4%] top-[37%] h-14 w-[32%] -rotate-3 bg-[#e3dad0]" />
+                <div className="absolute top-[52%] left-[-8%] h-14 w-[32%] -rotate-8 bg-[#faa340]" />
+                <div className="absolute top-[37%] right-[-4%] h-14 w-[32%] -rotate-3 bg-[#e3dad0]" />
                 <div className="absolute inset-x-0 bottom-0 h-[44%] bg-[#fbf5ed]" />
 
                 <section className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center justify-center px-6 py-10">
@@ -55,7 +55,9 @@ export default function Login({ status, canResetPassword }: Props) {
                             <div className="mx-auto mt-5 flex size-24 items-center justify-center rounded-full border border-[#040404]/10 bg-[#040404] text-3xl font-semibold text-white shadow-inner">
                                 R
                             </div>
-                            <h1 className="mt-5 text-2xl font-semibold">Renz</h1>
+                            <h1 className="mt-5 text-2xl font-semibold">
+                                Renz
+                            </h1>
                         </div>
 
                         <div className="mt-7 space-y-4">
@@ -64,7 +66,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     Email address
                                 </span>
                                 <span className="relative block">
-                                    <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#040404]/38" />
+                                    <Mail className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#040404]/38" />
                                     <input
                                         type="email"
                                         value={data.email}
@@ -73,7 +75,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                         }
                                         autoComplete="email"
                                         autoFocus
-                                        className="h-12 w-full rounded-md border border-[#040404]/14 bg-white px-10 text-sm outline-none transition placeholder:text-[#040404]/38 focus:border-[#faa340] focus:ring-4 focus:ring-[#faa340]/18"
+                                        className="h-12 w-full rounded-md border border-[#040404]/14 bg-white px-10 text-sm transition outline-none placeholder:text-[#040404]/38 focus:border-[#faa340] focus:ring-4 focus:ring-[#faa340]/18"
                                         placeholder="admin@aimfs.test"
                                         required
                                     />
@@ -86,24 +88,33 @@ export default function Login({ status, canResetPassword }: Props) {
                                     Password
                                 </span>
                                 <span className="relative block">
-                                    <LockKeyhole className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#040404]/38" />
+                                    <LockKeyhole className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#040404]/38" />
                                     <input
-                                        type={passwordVisible ? 'text' : 'password'}
+                                        type={
+                                            passwordVisible
+                                                ? 'text'
+                                                : 'password'
+                                        }
                                         value={data.password}
                                         onChange={(event) =>
-                                            setData('password', event.target.value)
+                                            setData(
+                                                'password',
+                                                event.target.value,
+                                            )
                                         }
                                         autoComplete="current-password"
-                                        className="h-12 w-full rounded-md border border-[#040404]/14 bg-white px-10 text-sm outline-none transition placeholder:text-[#040404]/38 focus:border-[#faa340] focus:ring-4 focus:ring-[#faa340]/18"
+                                        className="h-12 w-full rounded-md border border-[#040404]/14 bg-white px-10 text-sm transition outline-none placeholder:text-[#040404]/38 focus:border-[#faa340] focus:ring-4 focus:ring-[#faa340]/18"
                                         placeholder="Enter your password"
                                         required
                                     />
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            setPasswordVisible((visible) => !visible)
+                                            setPasswordVisible(
+                                                (visible) => !visible,
+                                            )
                                         }
-                                        className="absolute right-3 top-1/2 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded-md text-[#040404]/50 transition hover:text-[#040404]"
+                                        className="absolute top-1/2 right-3 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded-md text-[#040404]/50 transition hover:text-[#040404]"
                                         aria-label={
                                             passwordVisible
                                                 ? 'Hide password'
@@ -126,7 +137,10 @@ export default function Login({ status, canResetPassword }: Props) {
                                         type="checkbox"
                                         checked={data.remember}
                                         onChange={(event) =>
-                                            setData('remember', event.target.checked)
+                                            setData(
+                                                'remember',
+                                                event.target.checked,
+                                            )
                                         }
                                         className="size-4 rounded border-[#040404]/18 accent-[#faa340]"
                                     />
@@ -161,13 +175,22 @@ export default function Login({ status, canResetPassword }: Props) {
 
                     <footer className="mt-20 text-center text-sm text-[#040404]/55">
                         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-                            <a href="#" className="transition hover:text-[#040404]">
+                            <a
+                                href="#"
+                                className="transition hover:text-[#040404]"
+                            >
                                 Terms & Condition
                             </a>
-                            <a href="#" className="transition hover:text-[#040404]">
+                            <a
+                                href="#"
+                                className="transition hover:text-[#040404]"
+                            >
                                 Privacy
                             </a>
-                            <a href="#" className="transition hover:text-[#040404]">
+                            <a
+                                href="#"
+                                className="transition hover:text-[#040404]"
+                            >
                                 Help
                             </a>
                         </div>

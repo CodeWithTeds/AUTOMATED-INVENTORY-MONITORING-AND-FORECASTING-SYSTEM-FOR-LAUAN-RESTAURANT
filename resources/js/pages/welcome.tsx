@@ -13,17 +13,20 @@ import { dashboard, login } from '@/routes';
 const features = [
     {
         title: 'Forecast-ready inventory',
-        description: 'Track ingredient movement, stock risk, and prep needs before service gets busy.',
+        description:
+            'Track ingredient movement, stock risk, and prep needs before service gets busy.',
         icon: PackageCheck,
     },
     {
         title: 'Production clarity',
-        description: 'Keep kitchen planning close to demand with calm, scannable status views.',
+        description:
+            'Keep kitchen planning close to demand with calm, scannable status views.',
         icon: ChefHat,
     },
     {
         title: 'Admin confidence',
-        description: 'A focused dashboard for operators who need fast answers without visual noise.',
+        description:
+            'A focused dashboard for operators who need fast answers without visual noise.',
         icon: ShieldCheck,
     },
 ];
@@ -56,7 +59,7 @@ export default function Welcome() {
                             alt="Lauan Restaurant"
                             className="size-11 rounded-md object-cover"
                         />
-                        <span className="text-sm font-semibold uppercase tracking-[0.16em]">
+                        <span className="text-sm font-semibold tracking-[0.16em] uppercase">
                             Lauan
                         </span>
                     </Link>
@@ -72,18 +75,19 @@ export default function Welcome() {
                     </div>
                 </nav>
 
-                <section className="mx-auto grid min-h-[calc(100vh-84px)] w-full max-w-7xl items-center gap-10 px-6 pb-14 pt-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
+                <section className="mx-auto grid min-h-[calc(100vh-84px)] w-full max-w-7xl items-center gap-10 px-6 pt-6 pb-14 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
                     <div className="max-w-3xl">
                         <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#040404]/10 bg-white/70 px-3 py-1.5 text-sm text-[#040404]/70 shadow-sm">
                             <Sparkles className="size-4 text-[#faa340]" />
                             restaurant operations
                         </div>
-                        <h1 className="text-5xl font-semibold leading-[1.02] sm:text-6xl lg:text-7xl">
+                        <h1 className="text-5xl leading-[1.02] font-semibold sm:text-6xl lg:text-7xl">
                             Lauan Restaurant
                         </h1>
                         <p className="mt-6 max-w-2xl text-lg leading-8 text-[#040404]/68">
-                            A polished inventory and forecasting workspace for production,
-                            stock visibility, and decisions that need to feel effortless.
+                            A polished inventory and forecasting workspace for
+                            production, stock visibility, and decisions that
+                            need to feel effortless.
                         </p>
 
                         <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -104,8 +108,8 @@ export default function Welcome() {
                     </div>
 
                     <div className="relative">
-                        <div className="absolute left-8 top-10 h-14 w-[76%] -rotate-3 bg-[#faa340]" />
-                        <div className="absolute bottom-10 right-0 h-14 w-[62%] -rotate-3 bg-[#e3dad0]" />
+                        <div className="absolute top-10 left-8 h-14 w-[76%] -rotate-3 bg-[#faa340]" />
+                        <div className="absolute right-0 bottom-10 h-14 w-[62%] -rotate-3 bg-[#e3dad0]" />
                         <div className="relative overflow-hidden rounded-[28px] border border-[#040404]/10 bg-white shadow-[0_34px_110px_rgba(4,4,4,0.16)]">
                             <div className="flex items-center justify-between border-b border-[#040404]/8 px-5 py-4">
                                 <div className="flex items-center gap-2">
@@ -125,13 +129,24 @@ export default function Welcome() {
                                         alt="Lauan Restaurant mark"
                                         className="mb-10 size-20 rounded-lg object-cover"
                                     />
-                                    <p className="text-sm text-white/58">Current shift</p>
-                                    <p className="mt-2 text-3xl font-semibold">Freshmart</p>
+                                    <p className="text-sm text-white/58">
+                                        Current shift
+                                    </p>
+                                    <p className="mt-2 text-3xl font-semibold">
+                                        Freshmart
+                                    </p>
                                     <div className="mt-8 space-y-3">
                                         {metrics.map(([label, value]) => (
-                                            <div key={label} className="rounded-md bg-white/8 p-3">
-                                                <p className="text-xs text-white/48">{label}</p>
-                                                <p className="mt-1 font-semibold">{value}</p>
+                                            <div
+                                                key={label}
+                                                className="rounded-md bg-white/8 p-3"
+                                            >
+                                                <p className="text-xs text-white/48">
+                                                    {label}
+                                                </p>
+                                                <p className="mt-1 font-semibold">
+                                                    {value}
+                                                </p>
                                             </div>
                                         ))}
                                     </div>
@@ -144,33 +159,46 @@ export default function Welcome() {
                                                 <p className="text-sm text-[#040404]/55">
                                                     Sales and purchase
                                                 </p>
-                                                <p className="mt-1 text-3xl font-semibold">49K</p>
+                                                <p className="mt-1 text-3xl font-semibold">
+                                                    49K
+                                                </p>
                                             </div>
                                             <BarChart3 className="size-7 text-[#faa340]" />
                                         </div>
                                         <div className="mt-6 flex h-40 items-end gap-2">
-                                            {[42, 72, 50, 64, 86, 58, 78, 45, 68, 92, 61, 74].map(
-                                                (height, index) => (
-                                                    <span
-                                                        key={index}
-                                                        className="flex-1 rounded-t-md bg-[#faa340]"
-                                                        style={{ height: `${height}%` }}
-                                                    />
-                                                ),
-                                            )}
+                                            {[
+                                                42, 72, 50, 64, 86, 58, 78, 45,
+                                                68, 92, 61, 74,
+                                            ].map((height, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="flex-1 rounded-t-md bg-[#faa340]"
+                                                    style={{
+                                                        height: `${height}%`,
+                                                    }}
+                                                />
+                                            ))}
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="rounded-lg border border-[#040404]/10 bg-white p-4">
                                             <Clock3 className="mb-5 size-5 text-[#faa340]" />
-                                            <p className="text-2xl font-semibold">2 days</p>
-                                            <p className="text-sm text-[#040404]/52">stock runway</p>
+                                            <p className="text-2xl font-semibold">
+                                                2 days
+                                            </p>
+                                            <p className="text-sm text-[#040404]/52">
+                                                stock runway
+                                            </p>
                                         </div>
                                         <div className="rounded-lg border border-[#040404]/10 bg-white p-4">
                                             <PackageCheck className="mb-5 size-5 text-[#faa340]" />
-                                            <p className="text-2xl font-semibold">46 packs</p>
-                                            <p className="text-sm text-[#040404]/52">recommended</p>
+                                            <p className="text-2xl font-semibold">
+                                                46 packs
+                                            </p>
+                                            <p className="text-sm text-[#040404]/52">
+                                                recommended
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -179,18 +207,24 @@ export default function Welcome() {
                     </div>
                 </section>
 
-                <section id="operations" className="bg-white px-6 py-20 lg:px-8">
+                <section
+                    id="operations"
+                    className="bg-white px-6 py-20 lg:px-8"
+                >
                     <div className="mx-auto max-w-7xl">
                         <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
                             <div>
-                                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#faa340]">
+                                <p className="text-sm font-semibold tracking-[0.16em] text-[#faa340] uppercase">
                                     Operations
                                 </p>
-                                <h2 className="mt-3 max-w-md text-4xl font-semibold leading-tight">
+                                <h2 className="mt-3 max-w-md text-4xl leading-tight font-semibold">
                                     Built for calm, fast restaurant decisions.
                                 </h2>
                             </div>
-                            <div id="system" className="grid gap-4 md:grid-cols-3">
+                            <div
+                                id="system"
+                                className="grid gap-4 md:grid-cols-3"
+                            >
                                 {features.map((feature) => (
                                     <article
                                         key={feature.title}

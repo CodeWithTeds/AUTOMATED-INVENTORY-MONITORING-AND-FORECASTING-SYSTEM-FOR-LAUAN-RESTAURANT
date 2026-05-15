@@ -1,6 +1,6 @@
 import InputError from '@/components/input-error';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole, Mail, UserRoundCog } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { dashboard, home } from '@/routes';
 import { request } from '@/routes/password';
@@ -31,10 +31,6 @@ export default function Login({ status, canResetPassword }: Props) {
             <Head title="Log in" />
 
             <main className="relative flex min-h-screen overflow-hidden bg-[#f7f1ea] text-[#040404]">
-                <div className="absolute top-[52%] left-[-8%] h-14 w-[32%] -rotate-8 bg-[#faa340]" />
-                <div className="absolute top-[37%] right-[-4%] h-14 w-[32%] -rotate-3 bg-[#e3dad0]" />
-                <div className="absolute inset-x-0 bottom-0 h-[44%] bg-[#fbf5ed]" />
-
                 <section className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center justify-center px-6 py-10">
                     <Link href={home()} className="mb-5 block">
                         <img
@@ -53,10 +49,10 @@ export default function Login({ status, canResetPassword }: Props) {
                                 Welcome back
                             </p>
                             <div className="mx-auto mt-5 flex size-24 items-center justify-center rounded-full border border-[#040404]/10 bg-[#040404] text-3xl font-semibold text-white shadow-inner">
-                                R
+                                <UserRoundCog className="size-12" />
                             </div>
                             <h1 className="mt-5 text-2xl font-semibold">
-                                Renz
+                                Admin Login
                             </h1>
                         </div>
 

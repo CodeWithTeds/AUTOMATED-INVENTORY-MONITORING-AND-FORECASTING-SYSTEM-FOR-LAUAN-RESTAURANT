@@ -11,6 +11,7 @@ import {
     Settings,
     ShoppingCart,
     Store,
+    UserCog,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -122,7 +123,7 @@ function DonutPanel({ title }: { title: string }) {
 
 export default function Dashboard() {
     const { auth } = usePage().props;
-    const firstName = auth.user?.name?.split(' ')[0] ?? 'Renz';
+    const firstName = auth.user?.name?.split(' ')[0] ?? 'Admin';
 
     return (
         <>
@@ -178,8 +179,8 @@ export default function Dashboard() {
                             <button className="grid size-10 place-items-center rounded-md bg-[#f8f9fa]">
                                 <Settings className="size-5 text-[#6b7280]" />
                             </button>
-                            <div className="grid size-10 place-items-center rounded-md bg-[#e3dad0] text-sm font-semibold text-[#040404]">
-                                {firstName.charAt(0)}
+                            <div className="grid size-10 place-items-center rounded-md bg-[#fff4e7] text-[#faa340]">
+                                <UserCog className="size-5" />
                             </div>
                         </div>
                     </header>

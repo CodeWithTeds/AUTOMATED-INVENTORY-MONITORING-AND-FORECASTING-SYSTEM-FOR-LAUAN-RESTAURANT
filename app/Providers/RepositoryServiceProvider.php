@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\Inventory\InventoryItemRepository;
+use App\Repositories\Inventory\InventoryItemRepositoryInterface;
 use App\Repositories\TaskRepository;
 use App\Repositories\TaskRepositoryInterface;
 use App\Repositories\UserRepository;
@@ -10,7 +12,6 @@ use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
-
     /**
      * Register any application services.
      */
@@ -18,6 +19,7 @@ class RepositoryServiceProvider extends ServiceProvider
     {
         $this->app->singleton(TaskRepositoryInterface::class, TaskRepository::class);
         $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->singleton(InventoryItemRepositoryInterface::class, InventoryItemRepository::class);
     }
 
     /**

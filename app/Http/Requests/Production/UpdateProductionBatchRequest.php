@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Production;
 
 use App\Enums\ProductionBatchStatus;
+use App\Models\ProductionBatch;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,14 +19,25 @@ class UpdateProductionBatchRequest extends FormRequest
      */
     public function rules(): array
     {
+        $productionBatch = ProductionBatch::query()->find($this->route('production'));
+
         return [
-            'inventory_item_id' => ['required', 'integer', 'exists:inventory_items,id'],
             'batch_number' => [
                 'required',
                 'string',
                 'max:60',
                 Rule::unique('production_batches', 'batch_number')->ignore($this->route('production')),
             ],
+            'product_name' => ['required', 'string', 'max:160'],
+            'product_sku' => [
+                'nullable',
+                'string',
+                'max:40',
+                Rule::unique('inventory_items', 'sku')->ignore($productionBatch?->inventory_item_id),
+            ],
+            'product_unit' => ['required', 'string', 'max:24'],
+            'selling_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'product_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'planned_quantity' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'completed_quantity' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'waste_quantity' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
@@ -35,9 +47,6 @@ class UpdateProductionBatchRequest extends FormRequest
             'completed_at' => ['nullable', 'date'],
             'status' => ['required', Rule::enum(ProductionBatchStatus::class)],
             'notes' => ['nullable', 'string', 'max:2000'],
-            'product_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'display_as_menu' => ['nullable', 'boolean'],
-            'selling_price' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'materials' => ['required', 'array', 'min:1'],
             'materials.*.inventory_item_id' => ['required', 'integer', 'exists:inventory_items,id'],
             'materials.*.quantity' => ['required', 'numeric', 'min:0.01', 'max:99999999.99'],

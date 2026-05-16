@@ -27,6 +27,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'expiration_date',
     'status',
     'image_path',
+    'is_menu_item',
+    'selling_price',
     'notes',
 ])]
 class InventoryItem extends Model
@@ -45,6 +47,8 @@ class InventoryItem extends Model
         'daily_usage_rate' => 'decimal:2',
         'lead_time_days' => 'integer',
         'expiration_date' => 'date',
+        'is_menu_item' => 'boolean',
+        'selling_price' => 'decimal:2',
     ];
 
     public function productionBatches(): HasMany

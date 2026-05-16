@@ -51,9 +51,10 @@ class InventoryItemRepository implements InventoryItemRepositoryInterface
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function productOptions(): array
+    public function rawMaterialOptions(): array
     {
         return InventoryItem::query()
+            ->where('is_menu_item', false)
             ->orderBy('name')
             ->get(['id', 'sku', 'name', 'unit', 'current_stock'])
             ->map(fn (InventoryItem $item): array => [

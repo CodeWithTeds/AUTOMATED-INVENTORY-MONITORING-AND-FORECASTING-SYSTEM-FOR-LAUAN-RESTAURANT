@@ -17,7 +17,7 @@ interface InventoryItemRepositoryInterface
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function productOptions(): array;
+    public function rawMaterialOptions(): array;
 
     /**
      * @param  array<string, mixed>  $attributes

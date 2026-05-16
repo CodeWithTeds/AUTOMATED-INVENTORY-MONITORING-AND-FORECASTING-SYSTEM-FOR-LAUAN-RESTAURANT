@@ -50,6 +50,8 @@ class InventoryItemResource extends JsonResource
             'status_label' => $status?->label() ?? $this->status,
             'stock_state' => $stockState,
             'image_url' => $this->image_path ? "/storage/{$this->image_path}" : null,
+            'is_menu_item' => (bool) $this->is_menu_item,
+            'selling_price' => $this->selling_price !== null ? (float) $this->selling_price : null,
             'notes' => $this->notes,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),

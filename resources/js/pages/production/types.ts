@@ -3,12 +3,24 @@ export type ProductionOption = {
     label: string;
 };
 
-export type RawMaterialOption = {
+export type MenuItemOption = {
     id: number;
     sku: string;
     name: string;
     unit: string;
     current_stock: number;
+    selling_price: number | null;
+    image_url: string | null;
+    materials: MenuItemMaterialOption[];
+};
+
+export type MenuItemMaterialOption = {
+    raw_material_id: number;
+    name: string | null;
+    sku: string | null;
+    quantity: number;
+    unit: string;
+    available_stock: number;
 };
 
 export type ProductionBatch = {
@@ -87,11 +99,7 @@ export type ProductionSummary = {
 
 export type ProductionFormData = {
     batch_number: string;
-    product_name: string;
-    product_sku: string;
-    product_unit: string;
-    selling_price: string;
-    product_image: File | null;
+    inventory_item_id: string;
     planned_quantity: string;
     completed_quantity: string;
     waste_quantity: string;
@@ -100,14 +108,5 @@ export type ProductionFormData = {
     target_completion_date: string;
     completed_at: string;
     status: string;
-    notes: string;
-    materials: ProductionMaterialFormData[];
-};
-
-export type ProductionMaterialFormData = {
-    inventory_item_id: string;
-    selected: boolean;
-    quantity: string;
-    unit: string;
     notes: string;
 };

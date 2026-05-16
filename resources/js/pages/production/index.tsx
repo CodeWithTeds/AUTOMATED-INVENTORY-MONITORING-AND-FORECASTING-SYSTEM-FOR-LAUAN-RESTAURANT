@@ -7,18 +7,18 @@ import { ProductionFilters } from './components/production-filters';
 import { ProductionTable } from './components/production-table';
 import type {
     PaginatedProductionBatches,
+    MenuItemOption,
     ProductionBatch,
     ProductionFilters as ProductionFiltersType,
     ProductionOption,
     ProductionSummary,
-    RawMaterialOption,
 } from './types';
 
 type Props = {
     batches: PaginatedProductionBatches;
     filters: ProductionFiltersType;
     summary: ProductionSummary;
-    rawMaterialOptions: RawMaterialOption[];
+    menuItemOptions: MenuItemOption[];
     statusOptions: ProductionOption[];
 };
 
@@ -33,7 +33,7 @@ export default function ProductionIndex({
     batches,
     filters,
     summary,
-    rawMaterialOptions,
+    menuItemOptions,
     statusOptions,
 }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
@@ -60,7 +60,7 @@ export default function ProductionIndex({
                     <div>
                         <div className="flex items-center gap-2 text-xs font-medium text-[#040404]/65">
                             <CookingPot className="size-4" />
-                            Menu production from raw materials
+                            Production consumes Recipe / BOM materials
                         </div>
                         <h1 className="mt-0.5 text-xl font-semibold tracking-normal text-[#040404]">
                             Lauan Restaurant Menu Production
@@ -94,7 +94,7 @@ export default function ProductionIndex({
                 open={modalOpen}
                 onOpenChange={setModalOpen}
                 batch={selectedBatch}
-                rawMaterialOptions={rawMaterialOptions}
+                menuItemOptions={menuItemOptions}
                 statusOptions={statusOptions}
             />
         </>

@@ -10,44 +10,30 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
-import { ImagePlus, LoaderCircle, Utensils } from 'lucide-react';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import {
+    Clock3,
+    ImageIcon,
+    LoaderCircle,
+    PackageCheck,
+    Utensils,
+} from 'lucide-react';
+import { FormEvent, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type {
+    MenuItemOption,
     ProductionBatch,
     ProductionFormData,
     ProductionOption,
-    RawMaterialOption,
 } from '../types';
 
-const materialRows = (
-    rawMaterialOptions: RawMaterialOption[],
-    batch?: ProductionBatch | null,
-) =>
-    rawMaterialOptions.map((material) => {
-        const existing = batch?.materials.find(
-            (item) => item.inventory_item_id === material.id,
-        );
-
-        return {
-            inventory_item_id: String(material.id),
-            selected: existing !== undefined,
-            quantity: existing ? String(existing.quantity) : '',
-            unit: existing?.unit ?? material.unit,
-            notes: existing?.notes ?? '',
-        };
-    });
-
 const blankForm = (
-    rawMaterialOptions: RawMaterialOption[],
+    menuItemOptions: MenuItemOption[],
     statusOptions: ProductionOption[],
 ): ProductionFormData => ({
     batch_number: '',
-    product_name: '',
-    product_sku: '',
-    product_unit: 'pack',
-    selling_price: '0',
-    product_image: null,
+    inventory_item_id: menuItemOptions[0]?.id
+        ? String(menuItemOptions[0].id)
+        : '',
     planned_quantity: '0',
     completed_quantity: '0',
     waste_quantity: '0',
@@ -57,19 +43,11 @@ const blankForm = (
     completed_at: '',
     status: statusOptions[0]?.value ?? 'planned',
     notes: '',
-    materials: materialRows(rawMaterialOptions),
 });
 
-const batchToForm = (
-    batch: ProductionBatch,
-    rawMaterialOptions: RawMaterialOption[],
-): ProductionFormData => ({
+const batchToForm = (batch: ProductionBatch): ProductionFormData => ({
     batch_number: batch.batch_number,
-    product_name: batch.product_name ?? '',
-    product_sku: batch.product_sku ?? '',
-    product_unit: batch.product_unit ?? 'pack',
-    selling_price: String(batch.product_selling_price ?? '0'),
-    product_image: null,
+    inventory_item_id: String(batch.inventory_item_id),
     planned_quantity: String(batch.planned_quantity),
     completed_quantity: String(batch.completed_quantity),
     waste_quantity: String(batch.waste_quantity),
@@ -79,7 +57,6 @@ const batchToForm = (
     completed_at: batch.completed_at ?? '',
     status: batch.status,
     notes: batch.notes ?? '',
-    materials: materialRows(rawMaterialOptions, batch),
 });
 
 function Field({
@@ -104,26 +81,41 @@ function Field({
     );
 }
 
+function money(value: number | null) {
+    return new Intl.NumberFormat('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+        maximumFractionDigits: 2,
+    }).format(value ?? 0);
+}
+
+function dateTimeLocalNow() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+
+    return now.toISOString().slice(0, 16);
+}
+
 export function ProductionBatchModal({
     open,
     onOpenChange,
     batch,
-    rawMaterialOptions,
+    menuItemOptions,
     statusOptions,
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     batch: ProductionBatch | null;
-    rawMaterialOptions: RawMaterialOption[];
+    menuItemOptions: MenuItemOption[];
     statusOptions: ProductionOption[];
 }) {
     const isEditing = batch !== null;
     const defaults = useMemo(
         () =>
             batch
-                ? batchToForm(batch, rawMaterialOptions)
-                : blankForm(rawMaterialOptions, statusOptions),
-        [batch, rawMaterialOptions, statusOptions],
+                ? batchToForm(batch)
+                : blankForm(menuItemOptions, statusOptions),
+        [batch, menuItemOptions, statusOptions],
     );
     const {
         data,
@@ -135,61 +127,22 @@ export function ProductionBatchModal({
         clearErrors,
         transform,
     } = useForm<ProductionFormData>(defaults);
-    const [preview, setPreview] = useState<string | null>(
-        batch?.product_image_url ?? null,
+    const selectedMenuItem = menuItemOptions.find(
+        (item) => String(item.id) === data.inventory_item_id,
     );
-    const fieldError = (key: string) =>
-        (errors as Record<string, string | undefined>)[key];
+    const completedQuantity = Number(data.completed_quantity) || 0;
+    const currentStock = selectedMenuItem?.current_stock ?? 0;
+    const stockAfterCompletion = currentStock + completedQuantity;
 
     useEffect(() => {
         setData(defaults);
-        setPreview(batch?.product_image_url ?? null);
         clearErrors();
-    }, [batch?.product_image_url, clearErrors, defaults, setData]);
-
-    const selectImage = (file: File | null) => {
-        setData('product_image', file);
-
-        if (!file) {
-            setPreview(batch?.product_image_url ?? null);
-            return;
-        }
-
-        setPreview(URL.createObjectURL(file));
-    };
-
-    const updateMaterial = (
-        index: number,
-        field: keyof ProductionFormData['materials'][number],
-        value: string | boolean,
-    ) => {
-        setData(
-            'materials',
-            data.materials.map((material, currentIndex) =>
-                currentIndex === index
-                    ? {
-                          ...material,
-                          [field]: value,
-                      }
-                    : material,
-            ),
-        );
-    };
+    }, [clearErrors, defaults, setData]);
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
 
-        const selectedMaterials = data.materials
-            .filter((material) => material.selected)
-            .map((material) => ({
-                inventory_item_id: material.inventory_item_id,
-                quantity: material.quantity,
-                unit: material.unit,
-                notes: material.notes,
-            }));
-
         const options = {
-            forceFormData: true,
             preserveScroll: true,
             onSuccess: () => {
                 reset();
@@ -201,77 +154,131 @@ export function ProductionBatchModal({
             transform((current) => ({
                 ...current,
                 _method: 'put',
-                materials: selectedMaterials,
             }));
             post(`/production/${batch.id}`, options);
             return;
         }
 
-        transform((current) => ({
-            ...current,
-            materials: selectedMaterials,
-        }));
+        transform((current) => current);
         post('/production', options);
+    };
+
+    const updateStatus = (status: string) => {
+        setData((current) => ({
+            ...current,
+            status,
+            completed_at:
+                status === 'completed' && !current.completed_at
+                    ? dateTimeLocalNow()
+                    : current.completed_at,
+        }));
+    };
+
+    const updateAvailableProduct = (quantity: string) => {
+        setData((current) => ({
+            ...current,
+            completed_quantity: quantity,
+            status:
+                Number(quantity) > 0 && current.status !== 'cancelled'
+                    ? 'completed'
+                    : current.status,
+            completed_at:
+                Number(quantity) > 0 && !current.completed_at
+                    ? dateTimeLocalNow()
+                    : current.completed_at,
+        }));
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[92vh] overflow-y-auto p-0 sm:max-w-6xl">
+            <DialogContent className="max-h-[92vh] overflow-y-auto p-0 sm:max-w-5xl">
                 <form onSubmit={submit}>
-                    <div className="grid lg:grid-cols-[0.8fr_1.6fr]">
+                    <div className="grid lg:grid-cols-[0.9fr_1.5fr]">
                         <aside className="border-b border-[#040404]/10 p-5 text-[#040404] lg:border-r lg:border-b-0">
                             <DialogHeader>
                                 <DialogTitle className="text-2xl text-[#040404]">
                                     {isEditing
-                                        ? 'Edit menu production'
-                                        : 'Create menu production'}
+                                        ? 'Edit production batch'
+                                        : 'Create production batch'}
                                 </DialogTitle>
                                 <DialogDescription className="text-sm text-[#040404]/65">
-                                    Create a sellable menu item and consume raw
-                                    materials from inventory.
+                                    Select a Recipe / BOM item. Production will
+                                    deduct the needed raw materials when the
+                                    batch is completed.
                                 </DialogDescription>
                             </DialogHeader>
 
-                            <label className="mt-5 flex aspect-[4/3] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-md border-2 border-dashed border-[#faa340] text-center transition hover:border-[#040404]">
-                                {preview ? (
+                            <div className="mt-5 overflow-hidden rounded-md border border-[#040404]/15">
+                                {selectedMenuItem?.image_url ? (
                                     <img
-                                        src={preview}
-                                        alt=""
-                                        className="h-full w-full object-cover"
+                                        src={selectedMenuItem.image_url}
+                                        alt={selectedMenuItem.name}
+                                        className="aspect-[4/3] w-full object-cover"
                                     />
                                 ) : (
-                                    <span className="flex flex-col items-center gap-3 px-8 text-sm font-medium text-[#040404]">
-                                        <span className="grid size-14 place-items-center rounded-md border border-[#faa340] text-[#faa340]">
-                                            <ImagePlus className="size-7" />
-                                        </span>
-                                        <span>Upload menu image</span>
-                                        <span className="text-xs font-normal text-[#040404]/55">
-                                            JPG, PNG, or WEBP up to 2 MB
-                                        </span>
-                                    </span>
+                                    <div className="grid aspect-[4/3] place-items-center bg-[#f8f4ef] text-[#040404]/45">
+                                        <ImageIcon className="size-12" />
+                                    </div>
                                 )}
-                                <input
-                                    type="file"
-                                    accept="image/png,image/jpeg,image/webp"
-                                    className="sr-only"
-                                    onChange={(event) =>
-                                        selectImage(
-                                            event.target.files?.[0] ?? null,
-                                        )
-                                    }
-                                />
-                            </label>
-                            <InputError message={errors.product_image} />
+                                <div className="space-y-2 p-4">
+                                    <div>
+                                        <p className="text-sm font-semibold text-[#040404]">
+                                            {selectedMenuItem?.name ??
+                                                'No menu item selected'}
+                                        </p>
+                                        <p className="font-mono text-xs text-[#040404]/55">
+                                            {selectedMenuItem?.sku ??
+                                                'Create a Recipe / BOM first'}
+                                        </p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <span className="rounded border border-[#040404]/10 p-2">
+                                            <span className="block text-[#040404]/55">
+                                                POS price
+                                            </span>
+                                            <strong>
+                                                {money(
+                                                    selectedMenuItem?.selling_price ??
+                                                        null,
+                                                )}
+                                            </strong>
+                                        </span>
+                                        <span className="rounded border border-[#040404]/10 p-2">
+                                            <span className="block text-[#040404]/55">
+                                                Current stock
+                                            </span>
+                                            <strong>
+                                                {selectedMenuItem?.current_stock ??
+                                                    0}{' '}
+                                                {selectedMenuItem?.unit ??
+                                                    'units'}
+                                            </strong>
+                                            <span className="mt-1 block text-[11px] font-normal text-[#040404]/50">
+                                                Read-only POS/menu stock
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div className="rounded border border-[#faa340]/70 p-2 text-xs">
+                                        <span className="block text-[#040404]/55">
+                                            Stock after available product
+                                        </span>
+                                        <strong>
+                                            {stockAfterCompletion}{' '}
+                                            {selectedMenuItem?.unit ?? 'units'}
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div className="mt-4 rounded-md border border-[#faa340] p-4">
                                 <div className="flex items-center gap-2 text-sm font-semibold text-[#040404]">
-                                    <Utensils className="size-4 text-[#faa340]" />
-                                    POS sellable item
+                                    <PackageCheck className="size-4 text-[#faa340]" />
+                                    Recipe / BOM is automatic
                                 </div>
                                 <p className="mt-2 text-xs text-[#040404]/60">
-                                    This creates the menu product in inventory.
-                                    Completed quantity becomes sellable POS
-                                    stock.
+                                    The raw materials below come from the
+                                    selected menu item's BOM and are scaled by
+                                    the production quantity.
                                 </p>
                             </div>
                         </aside>
@@ -280,18 +287,18 @@ export function ProductionBatchModal({
                             <div className="mb-5 border-b border-[#040404]/10 pb-4">
                                 <div className="flex items-center gap-2 text-sm font-semibold text-[#040404]">
                                     <Utensils className="size-4 text-[#faa340]" />
-                                    Menu item output
+                                    Menu item from Recipe / BOM
                                 </div>
                                 <p className="mt-1 text-sm text-[#040404]/60">
-                                    No product dropdown here. Enter the menu item
-                                    you are producing.
+                                    Production uses the saved BOM and syncs
+                                    finished product stock for POS.
                                 </p>
                             </div>
 
                             <div className="space-y-5">
                                 <section className="border-b border-[#040404]/10 pb-5">
                                     <h3 className="mb-3 text-xs font-bold tracking-wide text-[#faa340] uppercase">
-                                        Sellable item
+                                        Batch output
                                     </h3>
                                     <div className="grid gap-4 md:grid-cols-6">
                                         <Field
@@ -311,83 +318,37 @@ export function ProductionBatchModal({
                                             />
                                         </Field>
                                         <Field
-                                            label="Menu item name"
-                                            error={errors.product_name}
+                                            label="Menu item"
+                                            error={errors.inventory_item_id}
                                             className="md:col-span-4"
                                         >
-                                            <Input
-                                                value={data.product_name}
+                                            <select
+                                                value={data.inventory_item_id}
                                                 onChange={(event) =>
                                                     setData(
-                                                        'product_name',
+                                                        'inventory_item_id',
                                                         event.target.value,
                                                     )
                                                 }
-                                                placeholder="Chicken Rice Meal"
-                                            />
+                                                className="h-9 w-full rounded-md border border-[#040404]/15 px-3 text-sm text-[#040404] shadow-xs outline-none focus:border-[#faa340] focus:ring-3 focus:ring-[#faa340]/30"
+                                            >
+                                                <option value="">
+                                                    Select menu item
+                                                </option>
+                                                {menuItemOptions.map((item) => (
+                                                    <option
+                                                        key={item.id}
+                                                        value={item.id}
+                                                    >
+                                                        {item.name} ({item.sku})
+                                                    </option>
+                                                ))}
+                                            </select>
                                         </Field>
-                                        <Field
-                                            label="SKU"
-                                            error={errors.product_sku}
-                                            className="md:col-span-2"
-                                        >
-                                            <Input
-                                                value={data.product_sku}
-                                                onChange={(event) =>
-                                                    setData(
-                                                        'product_sku',
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                placeholder="Auto if blank"
-                                            />
-                                        </Field>
-                                        <Field
-                                            label="Output unit"
-                                            error={errors.product_unit}
-                                            className="md:col-span-2"
-                                        >
-                                            <Input
-                                                value={data.product_unit}
-                                                onChange={(event) =>
-                                                    setData(
-                                                        'product_unit',
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                placeholder="pack, cup, box"
-                                            />
-                                        </Field>
-                                        <Field
-                                            label="POS price"
-                                            error={errors.selling_price}
-                                            className="md:col-span-2"
-                                        >
-                                            <Input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                value={data.selling_price}
-                                                onChange={(event) =>
-                                                    setData(
-                                                        'selling_price',
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                placeholder="120.00"
-                                            />
-                                        </Field>
-                                    </div>
-                                </section>
-
-                                <section className="border-b border-[#040404]/10 pb-5">
-                                    <h3 className="mb-3 text-xs font-bold tracking-wide text-[#faa340] uppercase">
-                                        Output quantity
-                                    </h3>
-                                    <div className="grid gap-4 md:grid-cols-4">
                                         <Field
                                             label="Planned qty"
                                             error={errors.planned_quantity}
+                                            className="md:col-span-2"
                                         >
                                             <Input
                                                 type="number"
@@ -403,8 +364,9 @@ export function ProductionBatchModal({
                                             />
                                         </Field>
                                         <Field
-                                            label="Completed qty"
+                                            label="Available product"
                                             error={errors.completed_quantity}
+                                            className="md:col-span-2"
                                         >
                                             <Input
                                                 type="number"
@@ -412,16 +374,21 @@ export function ProductionBatchModal({
                                                 min="0"
                                                 value={data.completed_quantity}
                                                 onChange={(event) =>
-                                                    setData(
-                                                        'completed_quantity',
+                                                    updateAvailableProduct(
                                                         event.target.value,
                                                     )
                                                 }
                                             />
+                                            <p className="text-xs text-[#040404]/55">
+                                                This quantity becomes POS stock
+                                                and deducts raw materials from
+                                                inventory.
+                                            </p>
                                         </Field>
                                         <Field
                                             label="Waste qty"
                                             error={errors.waste_quantity}
+                                            className="md:col-span-2"
                                         >
                                             <Input
                                                 type="number"
@@ -436,15 +403,76 @@ export function ProductionBatchModal({
                                                 }
                                             />
                                         </Field>
+                                    </div>
+                                </section>
+
+                                <section className="border-b border-[#040404]/10 pb-5">
+                                    <h3 className="mb-3 text-xs font-bold tracking-wide text-[#faa340] uppercase">
+                                        Recipe / BOM materials
+                                    </h3>
+                                    <div className="grid gap-2 md:grid-cols-2">
+                                        {selectedMenuItem?.materials.map(
+                                            (material) => (
+                                                <div
+                                                    key={
+                                                        material.raw_material_id
+                                                    }
+                                                    className="rounded-md border border-[#040404]/15 p-3"
+                                                >
+                                                    <p className="text-sm font-semibold text-[#040404]">
+                                                        {material.name ??
+                                                            'Raw material'}
+                                                    </p>
+                                                    <p className="font-mono text-[11px] text-[#040404]/50">
+                                                        {material.sku ??
+                                                            'No SKU'}
+                                                    </p>
+                                                    <div className="mt-2 flex flex-wrap gap-2 text-xs text-[#040404]/70">
+                                                        <span>
+                                                            Uses{' '}
+                                                            <strong className="text-[#040404]">
+                                                                {
+                                                                    material.quantity
+                                                                }{' '}
+                                                                {material.unit}
+                                                            </strong>{' '}
+                                                            per item
+                                                        </span>
+                                                        <span>
+                                                            Stock{' '}
+                                                            <strong className="text-[#040404]">
+                                                                {
+                                                                    material.available_stock
+                                                                }
+                                                            </strong>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ),
+                                        )}
+                                        {!selectedMenuItem && (
+                                            <p className="rounded-md border border-[#040404]/15 p-4 text-sm text-[#040404]/60 md:col-span-2">
+                                                Select a menu item with a saved
+                                                BOM.
+                                            </p>
+                                        )}
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h3 className="mb-3 text-xs font-bold tracking-wide text-[#faa340] uppercase">
+                                        Schedule
+                                    </h3>
+                                    <div className="grid gap-4 md:grid-cols-6">
                                         <Field
                                             label="Status"
                                             error={errors.status}
+                                            className="md:col-span-2"
                                         >
                                             <select
                                                 value={data.status}
                                                 onChange={(event) =>
-                                                    setData(
-                                                        'status',
+                                                    updateStatus(
                                                         event.target.value,
                                                     )
                                                 }
@@ -460,132 +488,6 @@ export function ProductionBatchModal({
                                                 ))}
                                             </select>
                                         </Field>
-                                    </div>
-                                </section>
-
-                                <section className="border-b border-[#040404]/10 pb-5">
-                                    <h3 className="mb-3 text-xs font-bold tracking-wide text-[#faa340] uppercase">
-                                        Raw materials consumed
-                                    </h3>
-                                    <InputError message={errors.materials} />
-                                    <div className="grid gap-2 md:grid-cols-2">
-                                        {data.materials.map(
-                                            (material, index) => {
-                                                const option =
-                                                    rawMaterialOptions[index];
-
-                                                return (
-                                                    <div
-                                                        key={
-                                                            material.inventory_item_id
-                                                        }
-                                                        className="grid gap-3 rounded-md border border-[#040404]/15 p-3 sm:grid-cols-[1fr_100px_76px]"
-                                                    >
-                                                        <label className="flex items-start gap-3">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={
-                                                                    material.selected
-                                                                }
-                                                                onChange={(
-                                                                    event,
-                                                                ) =>
-                                                                    updateMaterial(
-                                                                        index,
-                                                                        'selected',
-                                                                        event
-                                                                            .target
-                                                                            .checked,
-                                                                    )
-                                                                }
-                                                                className="mt-1 size-4 accent-[#faa340]"
-                                                            />
-                                                            <span>
-                                                                <span className="block text-sm font-semibold text-[#040404]">
-                                                                    {
-                                                                        option?.name
-                                                                    }
-                                                                </span>
-                                                                <span className="block font-mono text-[11px] text-[#040404]/50">
-                                                                    {
-                                                                        option?.sku
-                                                                    }{' '}
-                                                                    | stock:{' '}
-                                                                    {option?.current_stock ??
-                                                                        0}{' '}
-                                                                    {
-                                                                        option?.unit
-                                                                    }
-                                                                </span>
-                                                            </span>
-                                                        </label>
-                                                        <Field
-                                                            label="Consume"
-                                                            error={fieldError(
-                                                                `materials.${index}.quantity`,
-                                                            )}
-                                                        >
-                                                            <Input
-                                                                type="number"
-                                                                step="0.01"
-                                                                min="0.01"
-                                                                disabled={
-                                                                    !material.selected
-                                                                }
-                                                                value={
-                                                                    material.quantity
-                                                                }
-                                                                onChange={(
-                                                                    event,
-                                                                ) =>
-                                                                    updateMaterial(
-                                                                        index,
-                                                                        'quantity',
-                                                                        event
-                                                                            .target
-                                                                            .value,
-                                                                    )
-                                                                }
-                                                            />
-                                                        </Field>
-                                                        <Field
-                                                            label="Unit"
-                                                            error={fieldError(
-                                                                `materials.${index}.unit`,
-                                                            )}
-                                                        >
-                                                            <Input
-                                                                disabled={
-                                                                    !material.selected
-                                                                }
-                                                                value={
-                                                                    material.unit
-                                                                }
-                                                                onChange={(
-                                                                    event,
-                                                                ) =>
-                                                                    updateMaterial(
-                                                                        index,
-                                                                        'unit',
-                                                                        event
-                                                                            .target
-                                                                            .value,
-                                                                    )
-                                                                }
-                                                            />
-                                                        </Field>
-                                                    </div>
-                                                );
-                                            },
-                                        )}
-                                    </div>
-                                </section>
-
-                                <section>
-                                    <h3 className="mb-3 text-xs font-bold tracking-wide text-[#faa340] uppercase">
-                                        Schedule
-                                    </h3>
-                                    <div className="grid gap-4 md:grid-cols-6">
                                         <Field
                                             label="Production area"
                                             error={errors.production_area}
@@ -639,18 +541,33 @@ export function ProductionBatchModal({
                                         <Field
                                             label="Completed at"
                                             error={errors.completed_at}
-                                            className="md:col-span-3"
+                                            className="md:col-span-4"
                                         >
-                                            <Input
-                                                type="datetime-local"
-                                                value={data.completed_at}
-                                                onChange={(event) =>
-                                                    setData(
-                                                        'completed_at',
-                                                        event.target.value,
-                                                    )
-                                                }
-                                            />
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    type="datetime-local"
+                                                    value={data.completed_at}
+                                                    onChange={(event) =>
+                                                        setData(
+                                                            'completed_at',
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setData(
+                                                            'completed_at',
+                                                            dateTimeLocalNow(),
+                                                        )
+                                                    }
+                                                    className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-[#faa340] px-3 text-sm font-medium text-[#040404] transition hover:text-[#faa340]"
+                                                >
+                                                    <Clock3 className="size-4" />
+                                                    Set now
+                                                </button>
+                                            </div>
                                         </Field>
                                         <Field
                                             label="Notes"
@@ -689,7 +606,7 @@ export function ProductionBatchModal({
                                     {processing && (
                                         <LoaderCircle className="size-4 animate-spin" />
                                     )}
-                                    {isEditing ? 'Save changes' : 'Create menu'}
+                                    {isEditing ? 'Save changes' : 'Create batch'}
                                 </button>
                             </DialogFooter>
                         </div>

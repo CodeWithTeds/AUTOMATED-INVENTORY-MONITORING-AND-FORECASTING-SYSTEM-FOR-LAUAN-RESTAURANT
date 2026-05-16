@@ -118,7 +118,7 @@ export function ProductionTable({
                         </strong>
                     </span>
                     <span>
-                        Completed{' '}
+                        Available{' '}
                         <strong className="text-[#040404]">
                             {summary.completed}
                         </strong>
@@ -152,7 +152,7 @@ export function ProductionTable({
                             <th className="px-2 py-1.5">
                                 <SortButton
                                     field="completed_quantity"
-                                    label="Completed"
+                                    label="Available product"
                                     filters={filters}
                                 />
                             </th>
@@ -171,7 +171,7 @@ export function ProductionTable({
                             <th className="px-2 py-1.5">
                                 <SortButton
                                     field="completed_at"
-                                    label="Completed at"
+                                    label="Available at"
                                     filters={filters}
                                 />
                             </th>

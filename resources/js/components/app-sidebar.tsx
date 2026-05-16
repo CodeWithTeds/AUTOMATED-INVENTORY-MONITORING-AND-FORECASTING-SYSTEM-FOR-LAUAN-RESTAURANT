@@ -44,8 +44,8 @@ const mainNavItems: NavItem[] = [
         icon: CookingPot,
     },
     {
-        title: 'Menu & Recipe',
-        href: dashboard(),
+        title: 'Recipe / BOM',
+        href: '/recipes',
         icon: Utensils,
     },
     {

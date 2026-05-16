@@ -49,6 +49,24 @@ class InventoryItemRepository implements InventoryItemRepositoryInterface
     }
 
     /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function productOptions(): array
+    {
+        return InventoryItem::query()
+            ->orderBy('name')
+            ->get(['id', 'sku', 'name', 'unit', 'current_stock'])
+            ->map(fn (InventoryItem $item): array => [
+                'id' => $item->id,
+                'sku' => $item->sku,
+                'name' => $item->name,
+                'unit' => $item->unit,
+                'current_stock' => (float) $item->current_stock,
+            ])
+            ->all();
+    }
+
+    /**
      * @param  array<string, mixed>  $attributes
      */
     public function create(array $attributes): InventoryItem
@@ -73,6 +91,13 @@ class InventoryItemRepository implements InventoryItemRepositoryInterface
     public function update(InventoryItem $inventoryItem, array $attributes): bool
     {
         return $inventoryItem->update($attributes);
+    }
+
+    public function adjustCurrentStock(InventoryItem $inventoryItem, float $quantityDelta): bool
+    {
+        $inventoryItem->current_stock = max(0, (float) $inventoryItem->current_stock + $quantityDelta);
+
+        return $inventoryItem->save();
     }
 
     public function delete(InventoryItem $inventoryItem): bool

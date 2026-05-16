@@ -15,6 +15,11 @@ interface InventoryItemRepositoryInterface
     public function find(int $id): InventoryItem;
 
     /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function productOptions(): array;
+
+    /**
      * @param  array<string, mixed>  $attributes
      */
     public function create(array $attributes): InventoryItem;
@@ -28,6 +33,8 @@ interface InventoryItemRepositoryInterface
      * @param  array<string, mixed>  $attributes
      */
     public function update(InventoryItem $inventoryItem, array $attributes): bool;
+
+    public function adjustCurrentStock(InventoryItem $inventoryItem, float $quantityDelta): bool;
 
     public function delete(InventoryItem $inventoryItem): bool;
 

@@ -60,4 +60,14 @@ class InventoryItem extends Model
     {
         return $this->hasMany(ProductionBatchMaterial::class);
     }
+
+    public function recipeMaterials(): HasMany
+    {
+        return $this->hasMany(RecipeMaterial::class, 'menu_item_id');
+    }
+
+    public function recipeUsages(): HasMany
+    {
+        return $this->hasMany(RecipeMaterial::class, 'raw_material_id');
+    }
 }

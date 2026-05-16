@@ -84,7 +84,7 @@ class RecipeBomService
     {
         return [
             'data' => RecipeBomResource::collection($paginator->items())->resolve(),
-            'links' => $paginator->toArray()['links'],
+            'links' => $this->paginationLinks($paginator),
             'meta' => [
                 'from' => $paginator->firstItem(),
                 'to' => $paginator->lastItem(),
@@ -94,6 +94,36 @@ class RecipeBomService
                 'last_page' => $paginator->lastPage(),
             ],
         ];
+    }
+
+    /**
+     * @return array<int, array{url: string|null, label: string, active: bool}>
+     */
+    private function paginationLinks(LengthAwarePaginator $paginator): array
+    {
+        $links = [
+            [
+                'url' => $paginator->previousPageUrl(),
+                'label' => '&laquo; Previous',
+                'active' => false,
+            ],
+        ];
+
+        foreach ($paginator->getUrlRange(1, $paginator->lastPage()) as $page => $url) {
+            $links[] = [
+                'url' => $url,
+                'label' => (string) $page,
+                'active' => $page === $paginator->currentPage(),
+            ];
+        }
+
+        $links[] = [
+            'url' => $paginator->nextPageUrl(),
+            'label' => 'Next &raquo;',
+            'active' => false,
+        ];
+
+        return $links;
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Enums\InventoryItemStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
@@ -45,4 +46,14 @@ class InventoryItem extends Model
         'lead_time_days' => 'integer',
         'expiration_date' => 'date',
     ];
+
+    public function productionBatches(): HasMany
+    {
+        return $this->hasMany(ProductionBatch::class);
+    }
+
+    public function productionMaterialUsages(): HasMany
+    {
+        return $this->hasMany(ProductionBatchMaterial::class);
+    }
 }

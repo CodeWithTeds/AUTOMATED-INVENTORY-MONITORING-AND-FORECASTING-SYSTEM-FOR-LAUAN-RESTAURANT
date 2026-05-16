@@ -39,7 +39,6 @@ test('authenticated users can view production batches', function (): void {
 
 test('completed production batch syncs finished stock to the connected product', function (): void {
     $user = User::factory()->create();
-    $product = productionProduct(['current_stock' => 10]);
     $rawMaterial = productionProduct([
         'sku' => 'RAW-CHICKEN-001',
         'name' => 'Chicken Breast',
@@ -51,8 +50,11 @@ test('completed production batch syncs finished stock to the connected product',
         ->withSession(['_token' => 'test-token'])
         ->post('/production', [
             '_token' => 'test-token',
-            'inventory_item_id' => $product->id,
             'batch_number' => 'PRD-2026-001',
+            'product_name' => 'Chicken Rice Meal',
+            'product_sku' => 'MENU-CRM-001',
+            'product_unit' => 'pack',
+            'selling_price' => 149,
             'planned_quantity' => 20,
             'completed_quantity' => 18.5,
             'waste_quantity' => 1.5,
@@ -65,28 +67,32 @@ test('completed production batch syncs finished stock to the connected product',
             'materials' => [
                 [
                     'inventory_item_id' => $rawMaterial->id,
-                    'quantity' => 2.5,
-                    'unit' => 'kg',
+                    'quantity' => 500,
+                    'unit' => 'g',
                     'notes' => 'Marinated chicken',
                 ],
             ],
         ])
         ->assertRedirect();
 
-    expect((float) $product->refresh()->current_stock)->toBe(28.5);
-    expect((float) $rawMaterial->refresh()->current_stock)->toBe(47.5);
+    $menuProduct = InventoryItem::query()->where('sku', 'MENU-CRM-001')->firstOrFail();
+
+    expect((float) $menuProduct->current_stock)->toBe(18.5);
+    expect((float) $rawMaterial->refresh()->current_stock)->toBe(49.5);
+    expect((bool) $menuProduct->is_menu_item)->toBeTrue();
+    expect((float) $menuProduct->selling_price)->toBe(149.0);
 
     $this->assertDatabaseHas('production_batches', [
         'batch_number' => 'PRD-2026-001',
-        'inventory_item_id' => $product->id,
+        'inventory_item_id' => $menuProduct->id,
         'status' => ProductionBatchStatus::Completed->value,
         'stock_synced_quantity' => 18.5,
     ]);
     $this->assertDatabaseHas('production_batch_materials', [
         'inventory_item_id' => $rawMaterial->id,
-        'quantity' => 2.5,
-        'unit' => 'kg',
-        'stock_synced_quantity' => 2.5,
+        'quantity' => 500,
+        'unit' => 'g',
+        'stock_synced_quantity' => 0.5,
     ]);
 });
 
@@ -114,8 +120,11 @@ test('updating and deleting a completed batch keeps product stock in sync', func
         ->withSession(['_token' => 'test-token'])
         ->put("/production/{$batch->id}", [
             '_token' => 'test-token',
-            'inventory_item_id' => $product->id,
             'batch_number' => 'PRD-2026-002',
+            'product_name' => 'Chicken Adobo Tray',
+            'product_sku' => $product->sku,
+            'product_unit' => 'tray',
+            'selling_price' => 199,
             'planned_quantity' => 20,
             'completed_quantity' => 12,
             'waste_quantity' => 1,

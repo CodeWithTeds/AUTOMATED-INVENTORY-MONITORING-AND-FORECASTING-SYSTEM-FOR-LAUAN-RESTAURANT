@@ -34,7 +34,6 @@ class ProductionBatchRepository implements ProductionBatchRepositoryInterface
                 });
             })
             ->when($filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
-            ->when($filters['inventory_item_id'] ?? null, fn (Builder $query, string $productId) => $query->where('inventory_item_id', $productId))
             ->when($filters['production_area'] ?? null, fn (Builder $query, string $area) => $query->where('production_area', $area))
             ->orderBy($sort, $direction)
             ->paginate($perPage)

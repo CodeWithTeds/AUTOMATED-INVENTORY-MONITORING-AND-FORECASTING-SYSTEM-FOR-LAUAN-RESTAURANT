@@ -79,7 +79,9 @@ class InventoryItemSeeder extends Seeder
             'storage_area' => $storageArea,
             'expiration_date' => now()->addDays($expiresInDays)->toDateString(),
             'status' => $status,
-            'notes' => 'Seeded restaurant inventory baseline for monitoring and forecasting.',
+            'is_menu_item' => false,
+            'selling_price' => null,
+            'notes' => 'Raw material seed for production consumption and inventory forecasting.',
         ];
     }
 }

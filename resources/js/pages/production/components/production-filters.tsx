@@ -5,22 +5,18 @@ import { FormEvent, useState } from 'react';
 import type {
     ProductionFilters as ProductionFiltersType,
     ProductionOption,
-    ProductionProductOption,
 } from '../types';
 
 export function ProductionFilters({
     filters,
-    productOptions,
     statusOptions,
 }: {
     filters: ProductionFiltersType;
-    productOptions: ProductionProductOption[];
     statusOptions: ProductionOption[];
 }) {
     const [values, setValues] = useState({
         search: filters.search ?? '',
         status: filters.status ?? '',
-        inventory_item_id: filters.inventory_item_id ?? '',
         production_area: filters.production_area ?? '',
     });
 
@@ -37,7 +33,6 @@ export function ProductionFilters({
         setValues({
             search: '',
             status: '',
-            inventory_item_id: '',
             production_area: '',
         });
         router.get('/production', {}, { preserveScroll: true, replace: true });
@@ -48,7 +43,7 @@ export function ProductionFilters({
             onSubmit={applyFilters}
             className="border-y border-[#040404]/15 py-2"
         >
-            <div className="grid gap-2 lg:grid-cols-[minmax(220px,1.4fr)_repeat(3,minmax(150px,0.8fr))_auto_auto]">
+            <div className="grid gap-2 lg:grid-cols-[minmax(220px,1.4fr)_minmax(150px,0.8fr)_minmax(150px,0.8fr)_auto_auto]">
                 <label className="relative">
                     <span className="sr-only">Search production</span>
                     <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#040404]/45" />
@@ -61,29 +56,10 @@ export function ProductionFilters({
                             }))
                         }
                         className="h-8 border-[#040404]/15 pl-9 text-xs text-[#040404] focus-visible:border-[#faa340] focus-visible:ring-[#faa340]/30"
-                        placeholder="Search batch, product, area"
+                        placeholder="Search batch, menu item, area"
                         type="search"
                     />
                 </label>
-
-                <select
-                    value={values.inventory_item_id}
-                    onChange={(event) =>
-                        setValues((current) => ({
-                            ...current,
-                            inventory_item_id: event.target.value,
-                        }))
-                    }
-                    className="h-8 rounded-md border border-[#040404]/15 px-2 text-xs text-[#040404] shadow-xs outline-none focus:border-[#faa340] focus:ring-3 focus:ring-[#faa340]/30"
-                    aria-label="Filter by product"
-                >
-                    <option value="">All products</option>
-                    {productOptions.map((product) => (
-                        <option key={product.id} value={product.id}>
-                            {product.name}
-                        </option>
-                    ))}
-                </select>
 
                 <select
                     value={values.status}

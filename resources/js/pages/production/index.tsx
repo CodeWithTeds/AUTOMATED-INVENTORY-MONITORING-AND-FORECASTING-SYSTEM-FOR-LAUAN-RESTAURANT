@@ -10,15 +10,15 @@ import type {
     ProductionBatch,
     ProductionFilters as ProductionFiltersType,
     ProductionOption,
-    ProductionProductOption,
     ProductionSummary,
+    RawMaterialOption,
 } from './types';
 
 type Props = {
     batches: PaginatedProductionBatches;
     filters: ProductionFiltersType;
     summary: ProductionSummary;
-    productOptions: ProductionProductOption[];
+    rawMaterialOptions: RawMaterialOption[];
     statusOptions: ProductionOption[];
 };
 
@@ -33,7 +33,7 @@ export default function ProductionIndex({
     batches,
     filters,
     summary,
-    productOptions,
+    rawMaterialOptions,
     statusOptions,
 }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
@@ -60,10 +60,10 @@ export default function ProductionIndex({
                     <div>
                         <div className="flex items-center gap-2 text-xs font-medium text-[#040404]/65">
                             <CookingPot className="size-4" />
-                            Product-linked production control
+                            Menu production from raw materials
                         </div>
                         <h1 className="mt-0.5 text-xl font-semibold tracking-normal text-[#040404]">
-                            Lauan Restaurant Production
+                            Lauan Restaurant Menu Production
                         </h1>
                     </div>
                     <button
@@ -79,7 +79,6 @@ export default function ProductionIndex({
                 <div className="space-y-2">
                     <ProductionFilters
                         filters={filters}
-                        productOptions={productOptions}
                         statusOptions={statusOptions}
                     />
                     <ProductionTable
@@ -95,7 +94,7 @@ export default function ProductionIndex({
                 open={modalOpen}
                 onOpenChange={setModalOpen}
                 batch={selectedBatch}
-                productOptions={productOptions}
+                rawMaterialOptions={rawMaterialOptions}
                 statusOptions={statusOptions}
             />
         </>

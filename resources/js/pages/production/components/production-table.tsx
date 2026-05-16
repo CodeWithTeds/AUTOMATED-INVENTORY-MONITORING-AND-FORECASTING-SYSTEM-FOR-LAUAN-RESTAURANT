@@ -5,6 +5,7 @@ import {
     ArrowUp,
     CheckCircle2,
     Clock3,
+    ImageIcon,
     Pencil,
     Trash2,
 } from 'lucide-react';
@@ -132,6 +133,7 @@ export function ProductionTable({
                 <table className="w-full min-w-[1320px] text-left text-xs">
                     <thead className="text-xs text-[#040404]/65 uppercase">
                         <tr className="border-b border-[#040404]/10">
+                            <th className="w-10 px-2 py-1.5">Img</th>
                             <th className="px-2 py-1.5">
                                 <SortButton
                                     field="batch_number"
@@ -139,7 +141,7 @@ export function ProductionTable({
                                     filters={filters}
                                 />
                             </th>
-                            <th className="px-2 py-1.5">Product</th>
+                            <th className="px-2 py-1.5">Menu item</th>
                             <th className="px-2 py-1.5">
                                 <SortButton
                                     field="planned_quantity"
@@ -189,6 +191,19 @@ export function ProductionTable({
                                 key={batch.id}
                                 className="border-b border-[#040404]/10 align-middle last:border-0"
                             >
+                                <td className="px-2 py-1">
+                                    {batch.product_image_url ? (
+                                        <img
+                                            src={batch.product_image_url}
+                                            alt={batch.product_name ?? ''}
+                                            className="size-7 rounded object-cover ring-1 ring-[#040404]/15"
+                                        />
+                                    ) : (
+                                        <span className="grid size-7 place-items-center rounded text-[#040404]/45 ring-1 ring-[#040404]/15">
+                                            <ImageIcon className="size-3.5" />
+                                        </span>
+                                    )}
+                                </td>
                                 <td className="px-2 py-1 font-mono text-[11px] text-[#040404]/70">
                                     {batch.batch_number}
                                 </td>
@@ -200,6 +215,16 @@ export function ProductionTable({
                                     <p className="font-mono text-[11px] text-[#040404]/50">
                                         {batch.product_sku ?? 'No SKU'}
                                     </p>
+                                    {batch.product_is_menu_item && (
+                                        <p className="text-[11px] font-semibold text-[#faa340]">
+                                            Menu PHP{' '}
+                                            {(
+                                                batch.product_selling_price ?? 0
+                                            ).toLocaleString('en-PH', {
+                                                maximumFractionDigits: 2,
+                                            })}
+                                        </p>
+                                    )}
                                 </td>
                                 <td className="px-2 py-1 text-[#040404]/75">
                                     {quantity(
@@ -307,7 +332,7 @@ export function ProductionTable({
                         {batches.data.length === 0 && (
                             <tr>
                                 <td
-                                    colSpan={13}
+                                    colSpan={14}
                                     className="px-4 py-14 text-center text-[#040404]/60"
                                 >
                                     No production batches match the current

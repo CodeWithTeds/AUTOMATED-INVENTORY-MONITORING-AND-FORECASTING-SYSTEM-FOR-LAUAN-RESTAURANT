@@ -3,7 +3,7 @@ export type ProductionOption = {
     label: string;
 };
 
-export type ProductionProductOption = {
+export type RawMaterialOption = {
     id: number;
     sku: string;
     name: string;
@@ -19,6 +19,9 @@ export type ProductionBatch = {
     product_sku: string | null;
     product_unit: string | null;
     product_stock: number;
+    product_image_url: string | null;
+    product_is_menu_item: boolean;
+    product_selling_price: number | null;
     planned_quantity: number;
     completed_quantity: number;
     waste_quantity: number;
@@ -51,7 +54,6 @@ export type ProductionMaterial = {
 export type ProductionFilters = {
     search?: string;
     status?: string;
-    inventory_item_id?: string;
     production_area?: string;
     sort?: string;
     direction?: string;
@@ -84,8 +86,12 @@ export type ProductionSummary = {
 };
 
 export type ProductionFormData = {
-    inventory_item_id: string;
     batch_number: string;
+    product_name: string;
+    product_sku: string;
+    product_unit: string;
+    selling_price: string;
+    product_image: File | null;
     planned_quantity: string;
     completed_quantity: string;
     waste_quantity: string;
@@ -100,6 +106,7 @@ export type ProductionFormData = {
 
 export type ProductionMaterialFormData = {
     inventory_item_id: string;
+    selected: boolean;
     quantity: string;
     unit: string;
     notes: string;

@@ -10,24 +10,44 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
-import { ClipboardList, LoaderCircle, Plus, Trash2 } from 'lucide-react';
-import { FormEvent, useEffect, useMemo } from 'react';
+import { ImagePlus, LoaderCircle, Utensils } from 'lucide-react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type {
     ProductionBatch,
     ProductionFormData,
     ProductionOption,
-    ProductionProductOption,
+    RawMaterialOption,
 } from '../types';
 
+const materialRows = (
+    rawMaterialOptions: RawMaterialOption[],
+    batch?: ProductionBatch | null,
+) =>
+    rawMaterialOptions.map((material) => {
+        const existing = batch?.materials.find(
+            (item) => item.inventory_item_id === material.id,
+        );
+
+        return {
+            inventory_item_id: String(material.id),
+            selected: existing !== undefined,
+            quantity: existing ? String(existing.quantity) : '',
+            unit: existing?.unit ?? material.unit,
+            notes: existing?.notes ?? '',
+        };
+    });
+
 const blankForm = (
-    productOptions: ProductionProductOption[],
+    rawMaterialOptions: RawMaterialOption[],
     statusOptions: ProductionOption[],
 ): ProductionFormData => ({
-    inventory_item_id: productOptions[0]?.id
-        ? String(productOptions[0].id)
-        : '',
     batch_number: '',
+    product_name: '',
+    product_sku: '',
+    product_unit: 'pack',
+    selling_price: '0',
+    product_image: null,
     planned_quantity: '0',
     completed_quantity: '0',
     waste_quantity: '0',
@@ -37,21 +57,19 @@ const blankForm = (
     completed_at: '',
     status: statusOptions[0]?.value ?? 'planned',
     notes: '',
-    materials: [
-        {
-            inventory_item_id: productOptions[0]?.id
-                ? String(productOptions[0].id)
-                : '',
-            quantity: '0',
-            unit: productOptions[0]?.unit ?? 'kg',
-            notes: '',
-        },
-    ],
+    materials: materialRows(rawMaterialOptions),
 });
 
-const batchToForm = (batch: ProductionBatch): ProductionFormData => ({
-    inventory_item_id: String(batch.inventory_item_id),
+const batchToForm = (
+    batch: ProductionBatch,
+    rawMaterialOptions: RawMaterialOption[],
+): ProductionFormData => ({
     batch_number: batch.batch_number,
+    product_name: batch.product_name ?? '',
+    product_sku: batch.product_sku ?? '',
+    product_unit: batch.product_unit ?? 'pack',
+    selling_price: String(batch.product_selling_price ?? '0'),
+    product_image: null,
     planned_quantity: String(batch.planned_quantity),
     completed_quantity: String(batch.completed_quantity),
     waste_quantity: String(batch.waste_quantity),
@@ -61,12 +79,7 @@ const batchToForm = (batch: ProductionBatch): ProductionFormData => ({
     completed_at: batch.completed_at ?? '',
     status: batch.status,
     notes: batch.notes ?? '',
-    materials: batch.materials.map((material) => ({
-        inventory_item_id: String(material.inventory_item_id),
-        quantity: String(material.quantity),
-        unit: material.unit,
-        notes: material.notes ?? '',
-    })),
+    materials: materialRows(rawMaterialOptions, batch),
 });
 
 function Field({
@@ -95,22 +108,22 @@ export function ProductionBatchModal({
     open,
     onOpenChange,
     batch,
-    productOptions,
+    rawMaterialOptions,
     statusOptions,
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     batch: ProductionBatch | null;
-    productOptions: ProductionProductOption[];
+    rawMaterialOptions: RawMaterialOption[];
     statusOptions: ProductionOption[];
 }) {
     const isEditing = batch !== null;
     const defaults = useMemo(
         () =>
             batch
-                ? batchToForm(batch)
-                : blankForm(productOptions, statusOptions),
-        [batch, productOptions, statusOptions],
+                ? batchToForm(batch, rawMaterialOptions)
+                : blankForm(rawMaterialOptions, statusOptions),
+        [batch, rawMaterialOptions, statusOptions],
     );
     const {
         data,
@@ -122,76 +135,61 @@ export function ProductionBatchModal({
         clearErrors,
         transform,
     } = useForm<ProductionFormData>(defaults);
-
-    const selectedProduct = productOptions.find(
-        (product) => String(product.id) === data.inventory_item_id,
+    const [preview, setPreview] = useState<string | null>(
+        batch?.product_image_url ?? null,
     );
     const fieldError = (key: string) =>
         (errors as Record<string, string | undefined>)[key];
 
     useEffect(() => {
         setData(defaults);
+        setPreview(batch?.product_image_url ?? null);
         clearErrors();
-    }, [clearErrors, defaults, setData]);
+    }, [batch?.product_image_url, clearErrors, defaults, setData]);
 
-    const addMaterial = () => {
-        const firstMaterial = productOptions[0];
+    const selectImage = (file: File | null) => {
+        setData('product_image', file);
 
-        setData('materials', [
-            ...data.materials,
-            {
-                inventory_item_id: firstMaterial?.id
-                    ? String(firstMaterial.id)
-                    : '',
-                quantity: '0',
-                unit: firstMaterial?.unit ?? 'kg',
-                notes: '',
-            },
-        ]);
-    };
+        if (!file) {
+            setPreview(batch?.product_image_url ?? null);
+            return;
+        }
 
-    const removeMaterial = (index: number) => {
-        setData(
-            'materials',
-            data.materials.filter((_, currentIndex) => currentIndex !== index),
-        );
+        setPreview(URL.createObjectURL(file));
     };
 
     const updateMaterial = (
         index: number,
         field: keyof ProductionFormData['materials'][number],
-        value: string,
+        value: string | boolean,
     ) => {
-        const materials = data.materials.map((material, currentIndex) => {
-            if (currentIndex !== index) {
-                return material;
-            }
-
-            if (field === 'inventory_item_id') {
-                const materialProduct = productOptions.find(
-                    (product) => String(product.id) === value,
-                );
-
-                return {
-                    ...material,
-                    inventory_item_id: value,
-                    unit: materialProduct?.unit ?? material.unit,
-                };
-            }
-
-            return {
-                ...material,
-                [field]: value,
-            };
-        });
-
-        setData('materials', materials);
+        setData(
+            'materials',
+            data.materials.map((material, currentIndex) =>
+                currentIndex === index
+                    ? {
+                          ...material,
+                          [field]: value,
+                      }
+                    : material,
+            ),
+        );
     };
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
 
+        const selectedMaterials = data.materials
+            .filter((material) => material.selected)
+            .map((material) => ({
+                inventory_item_id: material.inventory_item_id,
+                quantity: material.quantity,
+                unit: material.unit,
+                notes: material.notes,
+            }));
+
         const options = {
+            forceFormData: true,
             preserveScroll: true,
             onSuccess: () => {
                 reset();
@@ -200,86 +198,102 @@ export function ProductionBatchModal({
         };
 
         if (isEditing) {
-            transform((current) => ({ ...current, _method: 'put' }));
+            transform((current) => ({
+                ...current,
+                _method: 'put',
+                materials: selectedMaterials,
+            }));
             post(`/production/${batch.id}`, options);
             return;
         }
 
-        transform((current) => current);
+        transform((current) => ({
+            ...current,
+            materials: selectedMaterials,
+        }));
         post('/production', options);
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[92vh] overflow-y-auto p-0 sm:max-w-5xl">
+            <DialogContent className="max-h-[92vh] overflow-y-auto p-0 sm:max-w-6xl">
                 <form onSubmit={submit}>
-                    <div className="grid lg:grid-cols-[0.85fr_1.5fr]">
+                    <div className="grid lg:grid-cols-[0.8fr_1.6fr]">
                         <aside className="border-b border-[#040404]/10 p-5 text-[#040404] lg:border-r lg:border-b-0">
                             <DialogHeader>
                                 <DialogTitle className="text-2xl text-[#040404]">
                                     {isEditing
-                                        ? 'Edit production'
-                                        : 'Create production'}
+                                        ? 'Edit menu production'
+                                        : 'Create menu production'}
                                 </DialogTitle>
                                 <DialogDescription className="text-sm text-[#040404]/65">
-                                    Link finished output to one product and add
-                                    the raw materials consumed by the batch.
+                                    Create a sellable menu item and consume raw
+                                    materials from inventory.
                                 </DialogDescription>
                             </DialogHeader>
 
-                            <div className="mt-5 rounded-md border border-[#faa340] p-4">
+                            <label className="mt-5 flex aspect-[4/3] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-md border-2 border-dashed border-[#faa340] text-center transition hover:border-[#040404]">
+                                {preview ? (
+                                    <img
+                                        src={preview}
+                                        alt=""
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <span className="flex flex-col items-center gap-3 px-8 text-sm font-medium text-[#040404]">
+                                        <span className="grid size-14 place-items-center rounded-md border border-[#faa340] text-[#faa340]">
+                                            <ImagePlus className="size-7" />
+                                        </span>
+                                        <span>Upload menu image</span>
+                                        <span className="text-xs font-normal text-[#040404]/55">
+                                            JPG, PNG, or WEBP up to 2 MB
+                                        </span>
+                                    </span>
+                                )}
+                                <input
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/webp"
+                                    className="sr-only"
+                                    onChange={(event) =>
+                                        selectImage(
+                                            event.target.files?.[0] ?? null,
+                                        )
+                                    }
+                                />
+                            </label>
+                            <InputError message={errors.product_image} />
+
+                            <div className="mt-4 rounded-md border border-[#faa340] p-4">
                                 <div className="flex items-center gap-2 text-sm font-semibold text-[#040404]">
-                                    <ClipboardList className="size-4 text-[#faa340]" />
-                                    Product and raw materials
+                                    <Utensils className="size-4 text-[#faa340]" />
+                                    POS sellable item
                                 </div>
                                 <p className="mt-2 text-xs text-[#040404]/60">
-                                    {selectedProduct
-                                        ? `${selectedProduct.sku} will receive completed stock. Raw materials below are deducted on completion.`
-                                        : 'Choose a product before saving.'}
+                                    This creates the menu product in inventory.
+                                    Completed quantity becomes sellable POS
+                                    stock.
                                 </p>
-                            </div>
-
-                            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                                <div className="rounded-md border border-[#040404]/15 p-3">
-                                    <p className="text-xs font-semibold text-[#040404]/55 uppercase">
-                                        Batch
-                                    </p>
-                                    <p className="mt-1 truncate font-semibold">
-                                        {data.batch_number || 'Pending'}
-                                    </p>
-                                </div>
-                                <div className="rounded-md border border-[#040404]/15 p-3">
-                                    <p className="text-xs font-semibold text-[#040404]/55 uppercase">
-                                        Status
-                                    </p>
-                                    <p className="mt-1 truncate font-semibold">
-                                        {statusOptions.find(
-                                            (option) =>
-                                                option.value === data.status,
-                                        )?.label ?? 'Planned'}
-                                    </p>
-                                </div>
                             </div>
                         </aside>
 
                         <div className="p-5 [&_input]:border-[#040404]/15 [&_input]:text-[#040404] [&_input]:focus-visible:border-[#faa340] [&_input]:focus-visible:ring-[#faa340]/30">
                             <div className="mb-5 border-b border-[#040404]/10 pb-4">
                                 <div className="flex items-center gap-2 text-sm font-semibold text-[#040404]">
-                                    <ClipboardList className="size-4 text-[#faa340]" />
-                                    Production details
+                                    <Utensils className="size-4 text-[#faa340]" />
+                                    Menu item output
                                 </div>
                                 <p className="mt-1 text-sm text-[#040404]/60">
-                                    Track batch movement from planned output to
-                                    completed stock and consumed ingredients.
+                                    No product dropdown here. Enter the menu item
+                                    you are producing.
                                 </p>
                             </div>
 
                             <div className="space-y-5">
                                 <section className="border-b border-[#040404]/10 pb-5">
                                     <h3 className="mb-3 text-xs font-bold tracking-wide text-[#faa340] uppercase">
-                                        Batch identity
+                                        Sellable item
                                     </h3>
-                                    <div className="grid gap-4 md:grid-cols-4">
+                                    <div className="grid gap-4 md:grid-cols-6">
                                         <Field
                                             label="Batch number"
                                             error={errors.batch_number}
@@ -297,38 +311,78 @@ export function ProductionBatchModal({
                                             />
                                         </Field>
                                         <Field
-                                            label="Product"
-                                            error={errors.inventory_item_id}
-                                            className="md:col-span-2"
+                                            label="Menu item name"
+                                            error={errors.product_name}
+                                            className="md:col-span-4"
                                         >
-                                            <select
-                                                value={data.inventory_item_id}
+                                            <Input
+                                                value={data.product_name}
                                                 onChange={(event) =>
                                                     setData(
-                                                        'inventory_item_id',
+                                                        'product_name',
                                                         event.target.value,
                                                     )
                                                 }
-                                                className="h-9 w-full rounded-md border border-[#040404]/15 px-3 text-sm text-[#040404] shadow-xs outline-none focus:border-[#faa340] focus:ring-3 focus:ring-[#faa340]/30"
-                                            >
-                                                {productOptions.map(
-                                                    (product) => (
-                                                        <option
-                                                            key={product.id}
-                                                            value={product.id}
-                                                        >
-                                                            {product.name}
-                                                        </option>
-                                                    ),
-                                                )}
-                                            </select>
+                                                placeholder="Chicken Rice Meal"
+                                            />
+                                        </Field>
+                                        <Field
+                                            label="SKU"
+                                            error={errors.product_sku}
+                                            className="md:col-span-2"
+                                        >
+                                            <Input
+                                                value={data.product_sku}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'product_sku',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="Auto if blank"
+                                            />
+                                        </Field>
+                                        <Field
+                                            label="Output unit"
+                                            error={errors.product_unit}
+                                            className="md:col-span-2"
+                                        >
+                                            <Input
+                                                value={data.product_unit}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'product_unit',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="pack, cup, box"
+                                            />
+                                        </Field>
+                                        <Field
+                                            label="POS price"
+                                            error={errors.selling_price}
+                                            className="md:col-span-2"
+                                        >
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                value={data.selling_price}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'selling_price',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="120.00"
+                                            />
                                         </Field>
                                     </div>
                                 </section>
 
                                 <section className="border-b border-[#040404]/10 pb-5">
                                     <h3 className="mb-3 text-xs font-bold tracking-wide text-[#faa340] uppercase">
-                                        Output
+                                        Output quantity
                                     </h3>
                                     <div className="grid gap-4 md:grid-cols-4">
                                         <Field
@@ -410,89 +464,63 @@ export function ProductionBatchModal({
                                 </section>
 
                                 <section className="border-b border-[#040404]/10 pb-5">
-                                    <div className="mb-3 flex items-center justify-between gap-2">
-                                        <h3 className="text-xs font-bold tracking-wide text-[#faa340] uppercase">
-                                            Raw materials
-                                        </h3>
-                                        <button
-                                            type="button"
-                                            onClick={addMaterial}
-                                            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#faa340] px-3 text-xs font-semibold text-[#040404] transition hover:text-[#faa340]"
-                                        >
-                                            <Plus className="size-3.5" />
-                                            Add material
-                                        </button>
-                                    </div>
+                                    <h3 className="mb-3 text-xs font-bold tracking-wide text-[#faa340] uppercase">
+                                        Raw materials consumed
+                                    </h3>
                                     <InputError message={errors.materials} />
-                                    <div className="space-y-3">
+                                    <div className="grid gap-2 md:grid-cols-2">
                                         {data.materials.map(
                                             (material, index) => {
-                                                const selectedMaterial =
-                                                    productOptions.find(
-                                                        (product) =>
-                                                            String(
-                                                                product.id,
-                                                            ) ===
-                                                            material.inventory_item_id,
-                                                    );
+                                                const option =
+                                                    rawMaterialOptions[index];
 
                                                 return (
                                                     <div
-                                                        key={index}
-                                                        className="grid gap-3 rounded-md border border-[#040404]/15 p-3 md:grid-cols-[minmax(180px,1.4fr)_minmax(90px,0.5fr)_minmax(80px,0.45fr)_minmax(140px,1fr)_auto]"
+                                                        key={
+                                                            material.inventory_item_id
+                                                        }
+                                                        className="grid gap-3 rounded-md border border-[#040404]/15 p-3 sm:grid-cols-[1fr_100px_76px]"
                                                     >
-                                                        <Field
-                                                            label="Material"
-                                                            error={fieldError(
-                                                                `materials.${index}.inventory_item_id`,
-                                                            )}
-                                                        >
-                                                            <select
-                                                                value={
-                                                                    material.inventory_item_id
+                                                        <label className="flex items-start gap-3">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={
+                                                                    material.selected
                                                                 }
                                                                 onChange={(
                                                                     event,
                                                                 ) =>
                                                                     updateMaterial(
                                                                         index,
-                                                                        'inventory_item_id',
+                                                                        'selected',
                                                                         event
                                                                             .target
-                                                                            .value,
+                                                                            .checked,
                                                                     )
                                                                 }
-                                                                className="h-9 w-full rounded-md border border-[#040404]/15 px-3 text-sm text-[#040404] shadow-xs outline-none focus:border-[#faa340] focus:ring-3 focus:ring-[#faa340]/30"
-                                                            >
-                                                                {productOptions.map(
-                                                                    (
-                                                                        product,
-                                                                    ) => (
-                                                                        <option
-                                                                            key={
-                                                                                product.id
-                                                                            }
-                                                                            value={
-                                                                                product.id
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                product.name
-                                                                            }
-                                                                        </option>
-                                                                    ),
-                                                                )}
-                                                            </select>
-                                                            <p className="text-[11px] text-[#040404]/50">
-                                                                Stock:{' '}
-                                                                {selectedMaterial?.current_stock ??
-                                                                    0}{' '}
-                                                                {selectedMaterial?.unit ??
-                                                                    material.unit}
-                                                            </p>
-                                                        </Field>
+                                                                className="mt-1 size-4 accent-[#faa340]"
+                                                            />
+                                                            <span>
+                                                                <span className="block text-sm font-semibold text-[#040404]">
+                                                                    {
+                                                                        option?.name
+                                                                    }
+                                                                </span>
+                                                                <span className="block font-mono text-[11px] text-[#040404]/50">
+                                                                    {
+                                                                        option?.sku
+                                                                    }{' '}
+                                                                    | stock:{' '}
+                                                                    {option?.current_stock ??
+                                                                        0}{' '}
+                                                                    {
+                                                                        option?.unit
+                                                                    }
+                                                                </span>
+                                                            </span>
+                                                        </label>
                                                         <Field
-                                                            label="Quantity"
+                                                            label="Consume"
                                                             error={fieldError(
                                                                 `materials.${index}.quantity`,
                                                             )}
@@ -501,6 +529,9 @@ export function ProductionBatchModal({
                                                                 type="number"
                                                                 step="0.01"
                                                                 min="0.01"
+                                                                disabled={
+                                                                    !material.selected
+                                                                }
                                                                 value={
                                                                     material.quantity
                                                                 }
@@ -524,6 +555,9 @@ export function ProductionBatchModal({
                                                             )}
                                                         >
                                                             <Input
+                                                                disabled={
+                                                                    !material.selected
+                                                                }
                                                                 value={
                                                                     material.unit
                                                                 }
@@ -538,53 +572,8 @@ export function ProductionBatchModal({
                                                                             .value,
                                                                     )
                                                                 }
-                                                                placeholder="g, kg, pcs"
                                                             />
                                                         </Field>
-                                                        <Field
-                                                            label="Notes"
-                                                            error={fieldError(
-                                                                `materials.${index}.notes`,
-                                                            )}
-                                                        >
-                                                            <Input
-                                                                value={
-                                                                    material.notes
-                                                                }
-                                                                onChange={(
-                                                                    event,
-                                                                ) =>
-                                                                    updateMaterial(
-                                                                        index,
-                                                                        'notes',
-                                                                        event
-                                                                            .target
-                                                                            .value,
-                                                                    )
-                                                                }
-                                                                placeholder="Trimmed, mixed, packed"
-                                                            />
-                                                        </Field>
-                                                        <div className="flex items-end">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    removeMaterial(
-                                                                        index,
-                                                                    )
-                                                                }
-                                                                disabled={
-                                                                    data
-                                                                        .materials
-                                                                        .length ===
-                                                                    1
-                                                                }
-                                                                className="inline-grid size-9 place-items-center rounded-md border border-[#040404]/15 text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340] disabled:pointer-events-none disabled:opacity-40"
-                                                                aria-label="Remove raw material"
-                                                            >
-                                                                <Trash2 className="size-4" />
-                                                            </button>
-                                                        </div>
                                                     </div>
                                                 );
                                             },
@@ -631,9 +620,7 @@ export function ProductionBatchModal({
                                         </Field>
                                         <Field
                                             label="Target date"
-                                            error={
-                                                errors.target_completion_date
-                                            }
+                                            error={errors.target_completion_date}
                                             className="md:col-span-2"
                                         >
                                             <Input
@@ -679,7 +666,7 @@ export function ProductionBatchModal({
                                                     )
                                                 }
                                                 className="min-h-20 w-full rounded-md border border-[#040404]/15 px-3 py-2 text-sm text-[#040404] shadow-xs outline-none focus:border-[#faa340] focus:ring-3 focus:ring-[#faa340]/30"
-                                                placeholder="Recipe run, expected yield, handoff notes"
+                                                placeholder="Production notes"
                                             />
                                         </Field>
                                     </div>
@@ -702,9 +689,7 @@ export function ProductionBatchModal({
                                     {processing && (
                                         <LoaderCircle className="size-4 animate-spin" />
                                     )}
-                                    {isEditing
-                                        ? 'Save changes'
-                                        : 'Create batch'}
+                                    {isEditing ? 'Save changes' : 'Create menu'}
                                 </button>
                             </DialogFooter>
                         </div>

@@ -2,12 +2,17 @@
 
 namespace App\Services\Production;
 
+use App\Enums\InventoryCategory;
+use App\Enums\InventoryItemStatus;
 use App\Enums\ProductionBatchStatus;
 use App\Http\Resources\ProductionBatchResource;
+use App\Models\InventoryItem;
 use App\Models\ProductionBatch;
 use App\Repositories\Inventory\InventoryItemRepositoryInterface;
 use App\Repositories\Production\ProductionBatchRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class ProductionBatchService
 {
@@ -29,7 +34,7 @@ class ProductionBatchService
             'batches' => $this->paginatedBatches($paginator),
             'filters' => $normalizedFilters,
             'summary' => $this->productionBatchRepository->summary(),
-            'productOptions' => $this->inventoryItemRepository->productOptions(),
+            'rawMaterialOptions' => $this->inventoryItemRepository->rawMaterialOptions(),
             'statusOptions' => $this->enumOptions(ProductionBatchStatus::cases()),
         ];
     }
@@ -40,8 +45,11 @@ class ProductionBatchService
     public function create(array $attributes): ProductionBatch
     {
         $materials = $this->normalizeMaterials($attributes['materials'] ?? []);
+        $productAttributes = $this->productAttributes($attributes);
         unset($attributes['materials']);
 
+        $product = $this->createMenuProduct($productAttributes);
+        $attributes['inventory_item_id'] = $product->id;
         $productionBatch = $this->productionBatchRepository->create($this->normalizeAttributes($attributes));
         $this->productionBatchRepository->replaceMaterials($productionBatch, $materials);
 
@@ -55,12 +63,14 @@ class ProductionBatchService
     {
         $productionBatch = $this->productionBatchRepository->find($id);
         $materials = $this->normalizeMaterials($attributes['materials'] ?? []);
+        $productAttributes = $this->productAttributes($attributes);
         unset($attributes['materials']);
 
         $this->revertSyncedStock($productionBatch);
         $attributes['stock_synced_quantity'] = 0;
 
         $this->productionBatchRepository->update($productionBatch, $this->normalizeAttributes($attributes, $productionBatch));
+        $this->updateMenuProduct($productionBatch->refresh()->load('product'), $productAttributes);
         $this->productionBatchRepository->replaceMaterials($productionBatch->refresh(), $materials);
 
         return $this->syncStock($productionBatch->refresh()->load(['product', 'materials.rawMaterial']));
@@ -112,6 +122,14 @@ class ProductionBatchService
      */
     private function normalizeAttributes(array $attributes, ?ProductionBatch $productionBatch = null): array
     {
+        unset(
+            $attributes['product_image'],
+            $attributes['product_name'],
+            $attributes['product_sku'],
+            $attributes['product_unit'],
+            $attributes['selling_price'],
+        );
+
         $attributes['planned_quantity'] ??= 0;
         $attributes['completed_quantity'] ??= 0;
         $attributes['waste_quantity'] ??= 0;
@@ -160,7 +178,7 @@ class ProductionBatchService
 
         foreach ($productionBatch->materials as $material) {
             $targetMaterialQuantity = $productionBatch->status === ProductionBatchStatus::Completed
-                ? (float) $material->quantity
+                ? $this->quantityForInventoryUnit((float) $material->quantity, $material->unit, $material->rawMaterial->unit)
                 : 0;
             $materialDelta = $targetMaterialQuantity - (float) $material->stock_synced_quantity;
 
@@ -191,5 +209,95 @@ class ProductionBatchService
             $this->inventoryItemRepository->adjustCurrentStock($material->rawMaterial, (float) $material->stock_synced_quantity);
             $this->productionBatchRepository->updateMaterialSyncedQuantity($material, 0);
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     * @return array<string, mixed>
+     */
+    private function productAttributes(array $attributes): array
+    {
+        return [
+            'product_image' => $attributes['product_image'] ?? null,
+            'product_name' => $attributes['product_name'],
+            'product_sku' => $attributes['product_sku'] ?: 'MENU-'.$attributes['batch_number'],
+            'product_unit' => $attributes['product_unit'],
+            'selling_price' => $attributes['selling_price'] ?? null,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function createMenuProduct(array $attributes): InventoryItem
+    {
+        $productAttributes = [
+            'sku' => $attributes['product_sku'],
+            'name' => $attributes['product_name'],
+            'category' => InventoryCategory::DryGoods,
+            'supplier' => 'Production',
+            'unit' => $attributes['product_unit'],
+            'current_stock' => 0,
+            'par_level' => 0,
+            'reorder_point' => 0,
+            'reorder_quantity' => 0,
+            'unit_cost' => 0,
+            'daily_usage_rate' => 0,
+            'lead_time_days' => 1,
+            'storage_area' => 'Menu / POS',
+            'status' => InventoryItemStatus::Active,
+            'is_menu_item' => true,
+            'selling_price' => $attributes['selling_price'],
+            'notes' => 'Created from production as a sellable POS menu item.',
+        ];
+
+        $image = $attributes['product_image'] ?? null;
+
+        if ($image instanceof UploadedFile) {
+            $productAttributes['image_path'] = $image->store('inventory-items', 'public');
+        }
+
+        return $this->inventoryItemRepository->create($productAttributes);
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function updateMenuProduct(ProductionBatch $productionBatch, array $attributes): void
+    {
+        $productAttributes = [
+            'sku' => $attributes['product_sku'],
+            'name' => $attributes['product_name'],
+            'unit' => $attributes['product_unit'],
+            'is_menu_item' => true,
+            'selling_price' => $attributes['selling_price'],
+        ];
+
+        $image = $attributes['product_image'] ?? null;
+
+        if ($image instanceof UploadedFile) {
+            $productAttributes['image_path'] = $image->store('inventory-items', 'public');
+
+            if ($productionBatch->product->image_path) {
+                Storage::disk('public')->delete($productionBatch->product->image_path);
+            }
+        }
+
+        $this->inventoryItemRepository->update($productionBatch->product, $productAttributes);
+    }
+
+    private function quantityForInventoryUnit(float $quantity, string $usedUnit, string $inventoryUnit): float
+    {
+        $usedUnit = strtolower($usedUnit);
+        $inventoryUnit = strtolower($inventoryUnit);
+
+        return match (true) {
+            $usedUnit === $inventoryUnit => $quantity,
+            $usedUnit === 'g' && $inventoryUnit === 'kg' => $quantity / 1000,
+            $usedUnit === 'kg' && $inventoryUnit === 'g' => $quantity * 1000,
+            $usedUnit === 'ml' && in_array($inventoryUnit, ['l', 'liter', 'liters'], true) => $quantity / 1000,
+            in_array($usedUnit, ['l', 'liter', 'liters'], true) && $inventoryUnit === 'ml' => $quantity * 1000,
+            default => $quantity,
+        };
     }
 }

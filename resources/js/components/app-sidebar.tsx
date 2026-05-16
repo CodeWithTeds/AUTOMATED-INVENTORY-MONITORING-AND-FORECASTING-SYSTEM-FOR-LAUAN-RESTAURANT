@@ -40,7 +40,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Production',
-        href: dashboard(),
+        href: '/production',
         icon: CookingPot,
     },
     {

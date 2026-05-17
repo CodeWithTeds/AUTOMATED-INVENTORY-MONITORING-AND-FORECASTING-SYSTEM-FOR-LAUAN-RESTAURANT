@@ -7,6 +7,7 @@ use App\Enums\InventoryItemStatus;
 use App\Http\Resources\InventoryItemResource;
 use App\Models\InventoryItem;
 use App\Repositories\Inventory\InventoryItemRepositoryInterface;
+use App\Repositories\Supplier\SupplierRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,7 @@ class InventoryItemService
 {
     public function __construct(
         private readonly InventoryItemRepositoryInterface $inventoryItemRepository,
+        private readonly SupplierRepositoryInterface $supplierRepository,
     ) {}
 
     /**
@@ -31,6 +33,7 @@ class InventoryItemService
             'filters' => $normalizedFilters,
             'summary' => $this->inventoryItemRepository->summary(),
             'categoryOptions' => $this->enumOptions(InventoryCategory::cases()),
+            'supplierOptions' => $this->supplierRepository->options(),
             'statusOptions' => $this->enumOptions(InventoryItemStatus::cases()),
             'stockStateOptions' => [
                 ['value' => 'healthy', 'label' => 'Healthy'],

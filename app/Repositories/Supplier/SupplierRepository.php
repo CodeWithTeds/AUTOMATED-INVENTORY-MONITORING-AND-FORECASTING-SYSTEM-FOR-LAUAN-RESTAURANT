@@ -42,6 +42,21 @@ class SupplierRepository implements SupplierRepositoryInterface
     }
 
     /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    public function options(): array
+    {
+        return Supplier::query()
+            ->orderBy('name')
+            ->get(['code', 'name'])
+            ->map(fn (Supplier $supplier): array => [
+                'value' => $supplier->name,
+                'label' => "{$supplier->name} ({$supplier->code})",
+            ])
+            ->all();
+    }
+
+    /**
      * @param  array<string, mixed>  $attributes
      */
     public function create(array $attributes): Supplier

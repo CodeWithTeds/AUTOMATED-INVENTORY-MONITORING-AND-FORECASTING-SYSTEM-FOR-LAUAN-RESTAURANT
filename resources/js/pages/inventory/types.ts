@@ -3,6 +3,11 @@ export type InventoryOption = {
     label: string;
 };
 
+export type SupplierOption = {
+    value: string;
+    label: string;
+};
+
 export type InventoryItem = {
     id: number;
     sku: string;

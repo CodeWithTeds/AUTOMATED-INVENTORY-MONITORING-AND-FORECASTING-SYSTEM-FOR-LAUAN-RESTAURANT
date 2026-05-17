@@ -11,6 +11,7 @@ import type {
     InventoryOption,
     InventorySummary as InventorySummaryType,
     PaginatedInventoryItems,
+    SupplierOption,
 } from './types';
 
 type Props = {
@@ -18,6 +19,7 @@ type Props = {
     filters: InventoryFiltersType;
     summary: InventorySummaryType;
     categoryOptions: InventoryOption[];
+    supplierOptions: SupplierOption[];
     statusOptions: InventoryOption[];
     stockStateOptions: InventoryOption[];
 };
@@ -34,6 +36,7 @@ export default function InventoryIndex({
     filters,
     summary,
     categoryOptions,
+    supplierOptions,
     statusOptions,
     stockStateOptions,
 }: Props) {
@@ -98,6 +101,7 @@ export default function InventoryIndex({
                 onOpenChange={setModalOpen}
                 item={selectedItem}
                 categoryOptions={categoryOptions}
+                supplierOptions={supplierOptions}
                 statusOptions={statusOptions}
             />
         </>

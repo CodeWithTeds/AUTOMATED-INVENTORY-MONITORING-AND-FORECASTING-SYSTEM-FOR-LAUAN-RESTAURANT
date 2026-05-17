@@ -17,6 +17,7 @@ import type {
     InventoryFormData,
     InventoryItem,
     InventoryOption,
+    SupplierOption,
 } from '../types';
 
 const blankForm = (
@@ -89,12 +90,14 @@ export function InventoryItemModal({
     onOpenChange,
     item,
     categoryOptions,
+    supplierOptions,
     statusOptions,
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     item: InventoryItem | null;
     categoryOptions: InventoryOption[];
+    supplierOptions: SupplierOption[];
     statusOptions: InventoryOption[];
 }) {
     const isEditing = item !== null;
@@ -310,7 +313,7 @@ export function InventoryItemModal({
                                             error={errors.supplier}
                                             className="md:col-span-2"
                                         >
-                                            <Input
+                                            <select
                                                 value={data.supplier}
                                                 onChange={(event) =>
                                                     setData(
@@ -318,8 +321,36 @@ export function InventoryItemModal({
                                                         event.target.value,
                                                     )
                                                 }
-                                                placeholder="Local market vendor"
-                                            />
+                                                className="h-9 w-full rounded-md border border-[#040404]/15 px-3 text-sm text-[#040404] shadow-xs outline-none focus:border-[#faa340] focus:ring-3 focus:ring-[#faa340]/30"
+                                            >
+                                                <option value="">
+                                                    Select supplier
+                                                </option>
+                                                {supplierOptions.map(
+                                                    (option) => (
+                                                        <option
+                                                            key={option.value}
+                                                            value={option.value}
+                                                        >
+                                                            {option.label}
+                                                        </option>
+                                                    ),
+                                                )}
+                                                {data.supplier &&
+                                                    !supplierOptions.some(
+                                                        (option) =>
+                                                            option.value ===
+                                                            data.supplier,
+                                                    ) && (
+                                                        <option
+                                                            value={
+                                                                data.supplier
+                                                            }
+                                                        >
+                                                            {data.supplier}
+                                                        </option>
+                                                    )}
+                                            </select>
                                         </Field>
                                     </div>
                                 </section>

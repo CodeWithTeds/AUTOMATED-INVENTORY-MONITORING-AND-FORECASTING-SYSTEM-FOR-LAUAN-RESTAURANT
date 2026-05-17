@@ -18,6 +18,11 @@ interface SupplierRepositoryInterface
     public function nextCode(): string;
 
     /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    public function options(): array;
+
+    /**
      * @param  array<string, mixed>  $attributes
      */
     public function create(array $attributes): Supplier;

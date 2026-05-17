@@ -21,7 +21,7 @@ class UpdateInventoryItemRequest extends FormRequest
     {
         return [
             'sku' => [
-                'required',
+                'nullable',
                 'string',
                 'max:40',
                 Rule::unique('inventory_items', 'sku')->ignore($this->route('inventory')),

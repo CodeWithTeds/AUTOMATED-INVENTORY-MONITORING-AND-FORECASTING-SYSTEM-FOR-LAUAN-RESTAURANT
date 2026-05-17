@@ -20,7 +20,7 @@ class StoreInventoryItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'sku' => ['required', 'string', 'max:40', 'unique:inventory_items,sku'],
+            'sku' => ['nullable', 'string', 'max:40', 'unique:inventory_items,sku'],
             'name' => ['required', 'string', 'max:160'],
             'category' => ['required', Rule::enum(InventoryCategory::class)],
             'supplier' => ['nullable', 'string', 'max:160'],

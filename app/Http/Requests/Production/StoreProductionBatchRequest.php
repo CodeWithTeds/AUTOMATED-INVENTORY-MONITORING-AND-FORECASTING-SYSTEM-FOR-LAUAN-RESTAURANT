@@ -19,7 +19,7 @@ class StoreProductionBatchRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'batch_number' => ['required', 'string', 'max:60', 'unique:production_batches,batch_number'],
+            'batch_number' => ['nullable', 'string', 'max:60', 'unique:production_batches,batch_number'],
             'inventory_item_id' => [
                 'required',
                 'integer',

@@ -37,16 +37,27 @@ class SupplierController extends Controller
 
     public function store(StoreSupplierRequest $request): RedirectResponse
     {
-        $this->suppliers->create($request->validated());
+        $attributes = $request->validated();
+        $attributes['code'] = empty($attributes['code'])
+            ? $this->suppliers->nextCode()
+            : $attributes['code'];
+
+        $this->suppliers->create($attributes);
 
         return back()->with('success', 'Supplier created successfully.');
     }
 
     public function update(UpdateSupplierRequest $request, string $supplier): RedirectResponse
     {
+        $supplierModel = $this->suppliers->find((int) $supplier);
+        $attributes = $request->validated();
+        $attributes['code'] = empty($attributes['code'])
+            ? $supplierModel->code
+            : $attributes['code'];
+
         $this->suppliers->update(
-            $this->suppliers->find((int) $supplier),
-            $request->validated(),
+            $supplierModel,
+            $attributes,
         );
 
         return back()->with('success', 'Supplier updated successfully.');

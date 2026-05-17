@@ -8,6 +8,8 @@ use App\Repositories\Production\ProductionBatchRepository;
 use App\Repositories\Production\ProductionBatchRepositoryInterface;
 use App\Repositories\Recipe\RecipeBomRepository;
 use App\Repositories\Recipe\RecipeBomRepositoryInterface;
+use App\Repositories\Supplier\SupplierRepository;
+use App\Repositories\Supplier\SupplierRepositoryInterface;
 use App\Repositories\TaskRepository;
 use App\Repositories\TaskRepositoryInterface;
 use App\Repositories\UserRepository;
@@ -26,6 +28,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->singleton(InventoryItemRepositoryInterface::class, InventoryItemRepository::class);
         $this->app->singleton(ProductionBatchRepositoryInterface::class, ProductionBatchRepository::class);
         $this->app->singleton(RecipeBomRepositoryInterface::class, RecipeBomRepository::class);
+        $this->app->singleton(SupplierRepositoryInterface::class, SupplierRepository::class);
     }
 
     /**

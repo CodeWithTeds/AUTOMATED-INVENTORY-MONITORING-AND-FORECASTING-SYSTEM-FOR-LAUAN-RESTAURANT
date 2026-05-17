@@ -60,7 +60,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Supplier',
-        href: dashboard(),
+        href: '/suppliers',
         icon: Truck,
     },
     {

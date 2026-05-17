@@ -47,7 +47,7 @@ function SortButton({
             className="inline-flex items-center gap-1 font-semibold whitespace-nowrap text-[#040404]/70 hover:text-[#040404]"
             onClick={() =>
                 router.get(
-                    '/production',
+                    '/admin/production',
                     { ...filters, sort: field, direction: nextDirection },
                     {
                         preserveScroll: true,
@@ -81,7 +81,7 @@ export function ProductionTable({
             return;
         }
 
-        router.delete(`/production/${batch.id}`, {
+        router.delete(`/admin/production/${batch.id}`, {
             preserveScroll: true,
         });
     };

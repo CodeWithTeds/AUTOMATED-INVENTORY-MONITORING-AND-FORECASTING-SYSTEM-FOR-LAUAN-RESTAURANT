@@ -25,7 +25,7 @@ export function InventoryFilters({
 
     const applyFilters = (event: FormEvent) => {
         event.preventDefault();
-        router.get('/inventory', values, {
+        router.get('/admin/inventory', values, {
             preserveScroll: true,
             preserveState: true,
             replace: true,
@@ -40,7 +40,11 @@ export function InventoryFilters({
             stock_state: '',
             storage_area: '',
         });
-        router.get('/inventory', {}, { preserveScroll: true, replace: true });
+        router.get(
+            '/admin/inventory',
+            {},
+            { preserveScroll: true, replace: true },
+        );
     };
 
     return (

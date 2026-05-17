@@ -151,12 +151,12 @@ export function InventoryItemModal({
 
         if (isEditing) {
             transform((current) => ({ ...current, _method: 'put' }));
-            post(`/inventory/${item.id}`, options);
+            post(`/admin/inventory/${item.id}`, options);
             return;
         }
 
         transform((current) => current);
-        post('/inventory', options);
+        post('/admin/inventory', options);
     };
 
     return (

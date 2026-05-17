@@ -28,7 +28,7 @@ export function SupplierFilters({
 
     const applyFilters = (event: FormEvent) => {
         event.preventDefault();
-        router.get('/suppliers', values, {
+        router.get('/admin/suppliers', values, {
             preserveScroll: true,
             preserveState: true,
             replace: true,
@@ -43,7 +43,11 @@ export function SupplierFilters({
             city: '',
             rating: '',
         });
-        router.get('/suppliers', {}, { preserveScroll: true, replace: true });
+        router.get(
+            '/admin/suppliers',
+            {},
+            { preserveScroll: true, replace: true },
+        );
     };
 
     return (

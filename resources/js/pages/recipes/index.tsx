@@ -23,7 +23,7 @@ type Props = {
 const breadcrumbs = [
     {
         title: 'Recipe / BOM',
-        href: '/recipes',
+        href: '/admin/recipes',
     },
 ];
 

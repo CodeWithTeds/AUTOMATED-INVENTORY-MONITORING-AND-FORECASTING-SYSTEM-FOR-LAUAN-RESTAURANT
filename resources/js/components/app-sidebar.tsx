@@ -35,17 +35,17 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Inventory',
-        href: '/inventory',
+        href: '/admin/inventory',
         icon: Boxes,
     },
     {
         title: 'Production',
-        href: '/production',
+        href: '/admin/production',
         icon: CookingPot,
     },
     {
         title: 'Recipe / BOM',
-        href: '/recipes',
+        href: '/admin/recipes',
         icon: Utensils,
     },
     {
@@ -60,7 +60,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Supplier',
-        href: '/suppliers',
+        href: '/admin/suppliers',
         icon: Truck,
     },
     {

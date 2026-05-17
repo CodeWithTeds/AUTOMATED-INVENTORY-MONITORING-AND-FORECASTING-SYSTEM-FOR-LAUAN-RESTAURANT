@@ -19,7 +19,8 @@ Route::middleware('guest')->group(function () {
         ->name('login.store');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
+    Route::redirect('/', '/admin/dashboard')->name('admin');
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
     Route::resource('inventory', InventoryItemController::class)
         ->only(['index', 'store', 'update', 'destroy']);
@@ -31,7 +32,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('suppliers.report');
     Route::resource('suppliers', SupplierController::class)
         ->only(['index', 'store', 'update', 'destroy']);
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
 
 require __DIR__.'/settings.php';

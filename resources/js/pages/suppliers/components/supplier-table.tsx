@@ -42,7 +42,7 @@ function SortButton({
             className="inline-flex items-center gap-1 font-semibold whitespace-nowrap text-[#040404]/70 hover:text-[#040404]"
             onClick={() =>
                 router.get(
-                    '/suppliers',
+                    '/admin/suppliers',
                     { ...filters, sort: field, direction: nextDirection },
                     {
                         preserveScroll: true,
@@ -71,7 +71,9 @@ function reportUrl(filters: SupplierFilters) {
 
     const query = params.toString();
 
-    return query ? `/suppliers/report?${query}` : '/suppliers/report';
+    return query
+        ? `/admin/suppliers/report?${query}`
+        : '/admin/suppliers/report';
 }
 
 export function SupplierTable({
@@ -90,7 +92,7 @@ export function SupplierTable({
             return;
         }
 
-        router.delete(`/suppliers/${supplier.id}`, {
+        router.delete(`/admin/suppliers/${supplier.id}`, {
             preserveScroll: true,
         });
     };

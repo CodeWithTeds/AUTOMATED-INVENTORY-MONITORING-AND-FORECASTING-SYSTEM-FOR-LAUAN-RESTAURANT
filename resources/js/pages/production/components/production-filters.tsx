@@ -22,7 +22,7 @@ export function ProductionFilters({
 
     const applyFilters = (event: FormEvent) => {
         event.preventDefault();
-        router.get('/production', values, {
+        router.get('/admin/production', values, {
             preserveScroll: true,
             preserveState: true,
             replace: true,
@@ -35,7 +35,11 @@ export function ProductionFilters({
             status: '',
             production_area: '',
         });
-        router.get('/production', {}, { preserveScroll: true, replace: true });
+        router.get(
+            '/admin/production',
+            {},
+            { preserveScroll: true, replace: true },
+        );
     };
 
     return (

@@ -43,7 +43,7 @@ function SortButton({
             className="inline-flex items-center gap-1 text-xs font-semibold whitespace-nowrap text-[#040404]/70 hover:text-[#040404]"
             onClick={() =>
                 router.get(
-                    '/recipes',
+                    '/admin/recipes',
                     { ...filters, sort: field, direction: nextDirection },
                     {
                         preserveScroll: true,
@@ -77,7 +77,7 @@ export function RecipeBomGrid({
             return;
         }
 
-        router.delete(`/recipes/${recipe.id}`, {
+        router.delete(`/admin/recipes/${recipe.id}`, {
             preserveScroll: true,
         });
     };
@@ -90,9 +90,8 @@ export function RecipeBomGrid({
                         Recipe / BOM cards
                     </h2>
                     <p className="text-xs text-[#040404]/60">
-                        Showing {recipes.meta.from ?? 0}-
-                        {recipes.meta.to ?? 0} of {recipes.meta.total} menu
-                        items
+                        Showing {recipes.meta.from ?? 0}-{recipes.meta.to ?? 0}{' '}
+                        of {recipes.meta.total} menu items
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#040404]/70">
@@ -204,19 +203,23 @@ export function RecipeBomGrid({
                             </div>
 
                             <div className="space-y-1.5 border-t border-[#040404]/10 pt-3">
-                                {recipe.materials.slice(0, 4).map((material) => (
-                                    <div
-                                        key={material.id}
-                                        className="flex items-center justify-between gap-3 text-xs"
-                                    >
-                                        <span className="min-w-0 truncate text-[#040404]/75">
-                                            {material.name ?? 'Raw material'}
-                                        </span>
-                                        <span className="shrink-0 font-semibold text-[#040404]">
-                                            {material.quantity} {material.unit}
-                                        </span>
-                                    </div>
-                                ))}
+                                {recipe.materials
+                                    .slice(0, 4)
+                                    .map((material) => (
+                                        <div
+                                            key={material.id}
+                                            className="flex items-center justify-between gap-3 text-xs"
+                                        >
+                                            <span className="min-w-0 truncate text-[#040404]/75">
+                                                {material.name ??
+                                                    'Raw material'}
+                                            </span>
+                                            <span className="shrink-0 font-semibold text-[#040404]">
+                                                {material.quantity}{' '}
+                                                {material.unit}
+                                            </span>
+                                        </div>
+                                    ))}
                                 {recipe.materials.length > 4 && (
                                     <p className="text-xs text-[#040404]/45">
                                         +{recipe.materials.length - 4} more
@@ -242,8 +245,7 @@ export function RecipeBomGrid({
 
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[#040404]/10 pt-2">
                 <p className="text-xs text-[#040404]/60">
-                    Page {recipes.meta.current_page} of{' '}
-                    {recipes.meta.last_page}
+                    Page {recipes.meta.current_page} of {recipes.meta.last_page}
                 </p>
                 <div className="flex flex-wrap gap-1">
                     {recipes.links.map((link, index) =>

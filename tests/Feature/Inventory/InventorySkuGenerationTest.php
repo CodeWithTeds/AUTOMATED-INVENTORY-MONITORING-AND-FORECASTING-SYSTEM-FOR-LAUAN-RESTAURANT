@@ -29,7 +29,7 @@ test('inventory create form receives supplier dropdown options', function (): vo
     ]);
 
     $this->actingAs($user)
-        ->get('/inventory')
+        ->get('/admin/inventory')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('inventory/index')
@@ -59,7 +59,7 @@ test('inventory sku is generated from category when left blank', function (): vo
 
     $this->actingAs($user)
         ->withSession(['_token' => 'test-token'])
-        ->post('/inventory', [
+        ->post('/admin/inventory', [
             '_token' => 'test-token',
             'sku' => '',
             'name' => 'Automatic Flour',

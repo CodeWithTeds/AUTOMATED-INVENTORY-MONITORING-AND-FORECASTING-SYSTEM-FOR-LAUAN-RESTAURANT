@@ -155,12 +155,12 @@ export function ProductionBatchModal({
                 ...current,
                 _method: 'put',
             }));
-            post(`/production/${batch.id}`, options);
+            post(`/admin/production/${batch.id}`, options);
             return;
         }
 
         transform((current) => current);
-        post('/production', options);
+        post('/admin/production', options);
     };
 
     const updateStatus = (status: string) => {

@@ -4,18 +4,14 @@ import { Search } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import type { RecipeFilters as RecipeFiltersType } from '../types';
 
-export function RecipeBomFilters({
-    filters,
-}: {
-    filters: RecipeFiltersType;
-}) {
+export function RecipeBomFilters({ filters }: { filters: RecipeFiltersType }) {
     const [search, setSearch] = useState(filters.search ?? '');
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
 
         router.get(
-            '/recipes',
+            '/admin/recipes',
             {
                 ...filters,
                 search,

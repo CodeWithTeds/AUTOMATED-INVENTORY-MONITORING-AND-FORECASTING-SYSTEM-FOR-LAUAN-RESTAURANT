@@ -33,7 +33,7 @@ test('authenticated users can view recipe BOM records', function (): void {
     $this->withoutVite();
 
     $this->actingAs($user)
-        ->get('/recipes')
+        ->get('/admin/recipes')
         ->assertOk();
 });
 
@@ -46,7 +46,7 @@ test('users can create a menu item with raw-material BOM', function (): void {
 
     $this->actingAs($user)
         ->withSession(['_token' => 'test-token'])
-        ->post('/recipes', [
+        ->post('/admin/recipes', [
             '_token' => 'test-token',
             'name' => 'Chicken Rice Meal',
             'sku' => 'MENU-CRM-001',

@@ -182,7 +182,7 @@ export function RecipeBomModal({
                 _method: 'put',
                 materials: selectedMaterials,
             }));
-            post(`/recipes/${recipe.id}`, options);
+            post(`/admin/recipes/${recipe.id}`, options);
             return;
         }
 
@@ -190,7 +190,7 @@ export function RecipeBomModal({
             ...current,
             materials: selectedMaterials,
         }));
-        post('/recipes', options);
+        post('/admin/recipes', options);
     };
 
     return (

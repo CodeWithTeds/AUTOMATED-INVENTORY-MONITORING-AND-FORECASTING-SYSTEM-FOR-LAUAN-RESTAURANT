@@ -121,12 +121,12 @@ export function SupplierModal({
 
         if (isEditing) {
             transform((current) => ({ ...current, _method: 'put' }));
-            post(`/suppliers/${supplier.id}`, options);
+            post(`/admin/suppliers/${supplier.id}`, options);
             return;
         }
 
         transform((current) => current);
-        post('/suppliers', options);
+        post('/admin/suppliers', options);
     };
 
     return (

@@ -51,7 +51,7 @@ test('authenticated users can view production batches', function (): void {
     $this->withoutVite();
 
     $this->actingAs($user)
-        ->get('/production')
+        ->get('/admin/production')
         ->assertOk();
 });
 
@@ -78,7 +78,7 @@ test('completed production uses the selected menu BOM and deducts raw inventory'
 
     $this->actingAs($user)
         ->withSession(['_token' => 'test-token'])
-        ->post('/production', [
+        ->post('/admin/production', [
             '_token' => 'test-token',
             'batch_number' => 'PRD-2026-001',
             'inventory_item_id' => $menuItem->id,
@@ -133,7 +133,7 @@ test('production batch number is generated when left blank', function (): void {
 
     $this->actingAs($user)
         ->withSession(['_token' => 'test-token'])
-        ->post('/production', [
+        ->post('/admin/production', [
             '_token' => 'test-token',
             'batch_number' => '',
             'inventory_item_id' => $menuItem->id,
@@ -184,7 +184,7 @@ test('updating and deleting a completed batch keeps product and raw stock in syn
 
     $this->actingAs($user)
         ->withSession(['_token' => 'test-token'])
-        ->put("/production/{$batch->id}", [
+        ->put("/admin/production/{$batch->id}", [
             '_token' => 'test-token',
             'batch_number' => 'PRD-2026-002',
             'inventory_item_id' => $menuItem->id,
@@ -205,7 +205,7 @@ test('updating and deleting a completed batch keeps product and raw stock in syn
 
     $this->actingAs($user)
         ->withSession(['_token' => 'test-token'])
-        ->delete("/production/{$batch->id}", [
+        ->delete("/admin/production/{$batch->id}", [
             '_token' => 'test-token',
         ])
         ->assertRedirect();
@@ -232,7 +232,7 @@ test('completed production is rejected when raw materials are not enough', funct
 
     $this->actingAs($user)
         ->withSession(['_token' => 'test-token'])
-        ->post('/production', [
+        ->post('/admin/production', [
             '_token' => 'test-token',
             'batch_number' => 'PRD-2026-003',
             'inventory_item_id' => $menuItem->id,

@@ -50,7 +50,7 @@ function SortButton({
             className="inline-flex items-center gap-1 font-semibold whitespace-nowrap text-[#040404]/70 hover:text-[#040404]"
             onClick={() =>
                 router.get(
-                    '/inventory',
+                    '/admin/inventory',
                     { ...filters, sort: field, direction: nextDirection },
                     {
                         preserveScroll: true,
@@ -84,7 +84,7 @@ export function InventoryTable({
             return;
         }
 
-        router.delete(`/inventory/${item.id}`, {
+        router.delete(`/admin/inventory/${item.id}`, {
             preserveScroll: true,
         });
     };

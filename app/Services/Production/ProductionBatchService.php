@@ -156,6 +156,9 @@ class ProductionBatchService
         $attributes['planned_quantity'] ??= 0;
         $attributes['completed_quantity'] ??= 0;
         $attributes['waste_quantity'] ??= 0;
+        $attributes['batch_number'] = empty($attributes['batch_number'])
+            ? ($productionBatch?->batch_number ?? $this->productionBatchRepository->nextBatchNumber((int) now()->format('Y')))
+            : $attributes['batch_number'];
 
         if (($attributes['status'] ?? $productionBatch?->status?->value) === ProductionBatchStatus::Completed->value && empty($attributes['completed_at'])) {
             $attributes['completed_at'] = now();

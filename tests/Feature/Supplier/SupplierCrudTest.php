@@ -83,6 +83,36 @@ test('authenticated users can create suppliers', function (): void {
     ]);
 });
 
+test('supplier code is generated when left blank', function (): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
+        ->post(route('suppliers.store'), [
+            '_token' => 'test-token',
+            'code' => '',
+            'name' => 'Automatic Supplier',
+            'category' => SupplierCategory::DryGoods->value,
+            'contact_person' => 'Ana Cruz',
+            'phone' => '+63 917 555 0000',
+            'email' => 'automatic.supplier@gmail.com',
+            'city' => 'Manila',
+            'address' => 'Warehouse',
+            'payment_terms' => 'Net 15',
+            'lead_time_days' => 2,
+            'rating' => 4,
+            'status' => SupplierStatus::Active->value,
+            'notes' => '',
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('suppliers', [
+        'code' => 'SUP-001',
+        'name' => 'Automatic Supplier',
+    ]);
+});
+
 test('authenticated users can update and delete suppliers', function (): void {
     $user = User::factory()->create();
     $supplier = supplierRecord();

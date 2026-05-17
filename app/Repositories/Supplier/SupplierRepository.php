@@ -25,6 +25,22 @@ class SupplierRepository implements SupplierRepositoryInterface
         return Supplier::query()->findOrFail($id);
     }
 
+    public function nextCode(): string
+    {
+        $latestNumber = Supplier::query()
+            ->where('code', 'like', 'SUP-%')
+            ->pluck('code')
+            ->reduce(function (int $highest, string $code): int {
+                if (preg_match('/^SUP-(\d+)$/', $code, $matches) !== 1) {
+                    return $highest;
+                }
+
+                return max($highest, (int) $matches[1]);
+            }, 0);
+
+        return sprintf('SUP-%03d', $latestNumber + 1);
+    }
+
     /**
      * @param  array<string, mixed>  $attributes
      */

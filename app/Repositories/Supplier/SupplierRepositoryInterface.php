@@ -15,6 +15,8 @@ interface SupplierRepositoryInterface
 
     public function find(int $id): Supplier;
 
+    public function nextCode(): string;
+
     /**
      * @param  array<string, mixed>  $attributes
      */

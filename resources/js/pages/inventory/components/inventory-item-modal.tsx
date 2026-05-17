@@ -254,14 +254,12 @@ export function InventoryItemModal({
                                             className="md:col-span-1"
                                         >
                                             <Input
-                                                value={data.sku}
-                                                onChange={(event) =>
-                                                    setData(
-                                                        'sku',
-                                                        event.target.value,
-                                                    )
+                                                value={
+                                                    data.sku ||
+                                                    'Auto-generated on save'
                                                 }
-                                                placeholder="LR-KIT-001"
+                                                readOnly
+                                                className="bg-[#040404]/5 text-[#040404]/70"
                                             />
                                         </Field>
                                         <Field

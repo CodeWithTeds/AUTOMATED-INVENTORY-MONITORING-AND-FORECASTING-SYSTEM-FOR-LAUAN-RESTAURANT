@@ -205,14 +205,12 @@ export function SupplierModal({
                                             className="md:col-span-1"
                                         >
                                             <Input
-                                                value={data.code}
-                                                onChange={(event) =>
-                                                    setData(
-                                                        'code',
-                                                        event.target.value,
-                                                    )
+                                                value={
+                                                    data.code ||
+                                                    'Auto-generated on save'
                                                 }
-                                                placeholder="SUP-001"
+                                                readOnly
+                                                className="bg-[#040404]/5 text-[#040404]/70"
                                             />
                                         </Field>
                                         <Field

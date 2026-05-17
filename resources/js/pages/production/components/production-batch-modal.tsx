@@ -307,14 +307,12 @@ export function ProductionBatchModal({
                                             className="md:col-span-2"
                                         >
                                             <Input
-                                                value={data.batch_number}
-                                                onChange={(event) =>
-                                                    setData(
-                                                        'batch_number',
-                                                        event.target.value,
-                                                    )
+                                                value={
+                                                    data.batch_number ||
+                                                    'Auto-generated on save'
                                                 }
-                                                placeholder="PRD-2026-001"
+                                                readOnly
+                                                className="bg-[#040404]/5 text-[#040404]/70"
                                             />
                                         </Field>
                                         <Field
@@ -522,7 +520,9 @@ export function ProductionBatchModal({
                                         </Field>
                                         <Field
                                             label="Target date"
-                                            error={errors.target_completion_date}
+                                            error={
+                                                errors.target_completion_date
+                                            }
                                             className="md:col-span-2"
                                         >
                                             <Input
@@ -606,7 +606,9 @@ export function ProductionBatchModal({
                                     {processing && (
                                         <LoaderCircle className="size-4 animate-spin" />
                                     )}
-                                    {isEditing ? 'Save changes' : 'Create batch'}
+                                    {isEditing
+                                        ? 'Save changes'
+                                        : 'Create batch'}
                                 </button>
                             </DialogFooter>
                         </div>

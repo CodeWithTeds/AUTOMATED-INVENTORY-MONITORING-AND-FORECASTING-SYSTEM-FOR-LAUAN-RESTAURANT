@@ -143,6 +143,11 @@ class InventoryItemService
         $image = $attributes['image'] ?? null;
         unset($attributes['image']);
 
+        if (empty($attributes['sku'])) {
+            $attributes['sku'] = $inventoryItem?->sku
+                ?? $this->inventoryItemRepository->nextSku($this->skuPrefix((string) ($attributes['category'] ?? 'general')));
+        }
+
         $attributes['daily_usage_rate'] ??= 0;
         $attributes['lead_time_days'] ??= 1;
 
@@ -155,5 +160,21 @@ class InventoryItemService
         }
 
         return $attributes;
+    }
+
+    private function skuPrefix(string $category): string
+    {
+        return match ($category) {
+            'produce' => 'PRO',
+            'meat' => 'MEAT',
+            'seafood' => 'SEA',
+            'dairy' => 'DAI',
+            'dry_goods' => 'DRY',
+            'beverage' => 'BEV',
+            'condiment' => 'CON',
+            'packaging' => 'PKG',
+            'cleaning' => 'CLN',
+            default => 'GEN',
+        };
     }
 }

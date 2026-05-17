@@ -15,6 +15,8 @@ interface ProductionBatchRepositoryInterface
 
     public function find(int $id): ProductionBatch;
 
+    public function nextBatchNumber(int $year): string;
+
     /**
      * @param  array<string, mixed>  $attributes
      */

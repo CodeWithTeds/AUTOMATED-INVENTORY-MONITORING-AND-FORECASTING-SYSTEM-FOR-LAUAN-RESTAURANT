@@ -111,6 +111,51 @@ test('completed production uses the selected menu BOM and deducts raw inventory'
     ]);
 });
 
+test('production batch number is generated when left blank', function (): void {
+    $user = User::factory()->create();
+    $menuItem = productionMenuItem([
+        'sku' => 'MENU-AUTO-001',
+        'name' => 'Auto Batch Meal',
+    ]);
+    $rawMaterial = productionInventoryItem([
+        'sku' => 'RAW-AUTO-001',
+        'name' => 'Auto Raw Material',
+        'unit' => 'kg',
+        'current_stock' => 50,
+    ]);
+
+    RecipeMaterial::query()->create([
+        'menu_item_id' => $menuItem->id,
+        'raw_material_id' => $rawMaterial->id,
+        'quantity' => 0.25,
+        'unit' => 'kg',
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
+        ->post('/production', [
+            '_token' => 'test-token',
+            'batch_number' => '',
+            'inventory_item_id' => $menuItem->id,
+            'planned_quantity' => 10,
+            'completed_quantity' => 0,
+            'waste_quantity' => 0,
+            'production_area' => 'Hot Kitchen',
+            'planned_start_date' => '',
+            'target_completion_date' => '',
+            'completed_at' => '',
+            'status' => ProductionBatchStatus::Planned->value,
+            'notes' => '',
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('production_batches', [
+        'batch_number' => 'PRD-'.now()->format('Y').'-001',
+        'inventory_item_id' => $menuItem->id,
+    ]);
+});
+
 test('updating and deleting a completed batch keeps product and raw stock in sync', function (): void {
     $user = User::factory()->create();
     $menuItem = productionMenuItem(['current_stock' => 10]);

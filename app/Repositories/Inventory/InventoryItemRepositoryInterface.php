@@ -19,6 +19,8 @@ interface InventoryItemRepositoryInterface
      */
     public function rawMaterialOptions(): array;
 
+    public function nextSku(string $prefix): string;
+
     /**
      * @param  array<string, mixed>  $attributes
      */

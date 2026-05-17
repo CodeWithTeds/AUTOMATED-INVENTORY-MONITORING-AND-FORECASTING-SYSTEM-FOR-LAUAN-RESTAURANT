@@ -20,7 +20,7 @@ class UpdateProductionBatchRequest extends FormRequest
     {
         return [
             'batch_number' => [
-                'required',
+                'nullable',
                 'string',
                 'max:60',
                 Rule::unique('production_batches', 'batch_number')->ignore($this->route('production')),

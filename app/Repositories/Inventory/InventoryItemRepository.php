@@ -67,6 +67,23 @@ class InventoryItemRepository implements InventoryItemRepositoryInterface
             ->all();
     }
 
+    public function nextSku(string $prefix): string
+    {
+        $normalizedPrefix = strtoupper($prefix);
+        $latestNumber = InventoryItem::query()
+            ->where('sku', 'like', "LR-{$normalizedPrefix}-%")
+            ->pluck('sku')
+            ->reduce(function (int $highest, string $sku) use ($normalizedPrefix): int {
+                if (preg_match("/^LR-{$normalizedPrefix}-(\\d+)$/", $sku, $matches) !== 1) {
+                    return $highest;
+                }
+
+                return max($highest, (int) $matches[1]);
+            }, 0);
+
+        return sprintf('LR-%s-%03d', $normalizedPrefix, $latestNumber + 1);
+    }
+
     /**
      * @param  array<string, mixed>  $attributes
      */

@@ -45,6 +45,22 @@ class ProductionBatchRepository implements ProductionBatchRepositoryInterface
         return ProductionBatch::query()->with(['product', 'materials.rawMaterial'])->findOrFail($id);
     }
 
+    public function nextBatchNumber(int $year): string
+    {
+        $latestNumber = ProductionBatch::query()
+            ->where('batch_number', 'like', "PRD-{$year}-%")
+            ->pluck('batch_number')
+            ->reduce(function (int $highest, string $batchNumber) use ($year): int {
+                if (preg_match("/^PRD-{$year}-(\\d+)$/", $batchNumber, $matches) !== 1) {
+                    return $highest;
+                }
+
+                return max($highest, (int) $matches[1]);
+            }, 0);
+
+        return sprintf('PRD-%d-%03d', $year, $latestNumber + 1);
+    }
+
     /**
      * @param  array<string, mixed>  $attributes
      */

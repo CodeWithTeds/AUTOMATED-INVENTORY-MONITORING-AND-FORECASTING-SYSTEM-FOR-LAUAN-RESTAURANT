@@ -21,7 +21,7 @@ class UpdateSupplierRequest extends FormRequest
     {
         return [
             'code' => [
-                'required',
+                'nullable',
                 'string',
                 'max:40',
                 Rule::unique('suppliers', 'code')->ignore($this->route('supplier')),

@@ -20,7 +20,7 @@ class StoreSupplierRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => ['required', 'string', 'max:40', 'unique:suppliers,code'],
+            'code' => ['nullable', 'string', 'max:40', 'unique:suppliers,code'],
             'name' => ['required', 'string', 'max:160'],
             'category' => ['required', Rule::enum(SupplierCategory::class)],
             'contact_person' => ['nullable', 'string', 'max:120'],

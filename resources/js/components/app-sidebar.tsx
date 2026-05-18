@@ -75,7 +75,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Reports',
-        href: dashboard(),
+        href: '/admin/report',
         icon: ClipboardList,
     },
 ];

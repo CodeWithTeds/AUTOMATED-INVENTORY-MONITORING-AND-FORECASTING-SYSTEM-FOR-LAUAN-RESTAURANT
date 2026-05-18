@@ -524,7 +524,7 @@ export default function PosIndex({
                                             </span>
                                             <div className="min-w-0">
                                                 <p className="truncate font-semibold">
-                                                    {order.customer_name ??
+                                                    {order.supplier_name ??
                                                         'Walk-in'}
                                                 </p>
                                                 <p className="text-sm text-[#040404]/45">
@@ -639,11 +639,6 @@ export default function PosIndex({
                                                 ) : (
                                                     <span className="grid h-full w-full place-items-center text-[#040404]/35">
                                                         <ImageIcon className="size-10" />
-                                                    </span>
-                                                )}
-                                                {index % 3 === 1 && (
-                                                    <span className="absolute top-2 left-2 bg-[#8b5cf6] px-2 py-1 text-[11px] font-semibold text-white">
-                                                        20% OFF
                                                     </span>
                                                 )}
                                                 {index % 4 === 0 && (

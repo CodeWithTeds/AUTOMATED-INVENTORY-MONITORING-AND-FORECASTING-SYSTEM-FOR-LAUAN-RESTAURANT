@@ -3,6 +3,7 @@
 use App\Enums\InventoryCategory;
 use App\Enums\InventoryItemStatus;
 use App\Enums\ProductionBatchStatus;
+use App\Enums\ProductionCategory;
 use App\Models\InventoryItem;
 use App\Models\ProductionBatch;
 use App\Models\RecipeMaterial;
@@ -153,6 +154,52 @@ test('production batch number is generated when left blank', function (): void {
     $this->assertDatabaseHas('production_batches', [
         'batch_number' => 'PRD-'.now()->format('Y').'-001',
         'inventory_item_id' => $menuItem->id,
+    ]);
+});
+
+test('production batches accept enum-backed categories', function (): void {
+    $user = User::factory()->create();
+    $menuItem = productionMenuItem([
+        'sku' => 'MENU-CAT-001',
+        'name' => 'Category Meal',
+    ]);
+    $rawMaterial = productionInventoryItem([
+        'sku' => 'RAW-CAT-001',
+        'name' => 'Category Raw Material',
+        'unit' => 'kg',
+        'current_stock' => 50,
+    ]);
+
+    RecipeMaterial::query()->create([
+        'menu_item_id' => $menuItem->id,
+        'raw_material_id' => $rawMaterial->id,
+        'quantity' => 0.25,
+        'unit' => 'kg',
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
+        ->post('/admin/production', [
+            '_token' => 'test-token',
+            'batch_number' => 'PRD-2026-CAT',
+            'category' => ProductionCategory::Burger->value,
+            'inventory_item_id' => $menuItem->id,
+            'planned_quantity' => 10,
+            'completed_quantity' => 0,
+            'waste_quantity' => 0,
+            'production_area' => 'Hot Kitchen',
+            'planned_start_date' => '',
+            'target_completion_date' => '',
+            'completed_at' => '',
+            'status' => ProductionBatchStatus::Planned->value,
+            'notes' => '',
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('production_batches', [
+        'batch_number' => 'PRD-2026-CAT',
+        'category' => ProductionCategory::Burger->value,
     ]);
 });
 

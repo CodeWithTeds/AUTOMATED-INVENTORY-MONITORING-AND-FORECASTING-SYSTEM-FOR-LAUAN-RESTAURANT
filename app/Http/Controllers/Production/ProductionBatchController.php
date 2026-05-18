@@ -17,7 +17,7 @@ class ProductionBatchController extends Controller
 
     public function index(Request $request): Response
     {
-        return Inertia::render('production/index', $this->productionBatchService->indexData($request->only(['search', 'status', 'production_area', 'sort', 'direction'])));
+        return Inertia::render('production/index', $this->productionBatchService->indexData($request->only(['search', 'category', 'status', 'production_area', 'sort', 'direction'])));
     }
 
     public function store(StoreProductionBatchRequest $request): RedirectResponse

@@ -3,8 +3,8 @@
 namespace App\Repositories;
 
 use App\Jobs\ProcessTaskActivity;
-use App\Models\User;
 use App\Models\Task;
+use App\Models\User;
 use App\Notifications\TaskActivityNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -13,7 +13,6 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class TaskRepository extends BaseRepository implements TaskRepositoryInterface
 {
-
     public function __construct(Task $model)
     {
         parent::__construct($model);
@@ -67,6 +66,7 @@ class TaskRepository extends BaseRepository implements TaskRepositoryInterface
 
         ProcessTaskActivity::dispatch($model, 'updated');
         $model->user->notify(new TaskActivityNotification($model, 'updated'));
+
         return $updated;
     }
 
@@ -74,7 +74,7 @@ class TaskRepository extends BaseRepository implements TaskRepositoryInterface
     {
         /**
          * CACHE_DRIVER=redis
-         * use tags instead in production 
+         * use tags instead in production
          */
         for ($i = 1; $i < 10; $i++) {
             Cache::forget("user:{$user->id}:items:page:{$i}:perPage:10");

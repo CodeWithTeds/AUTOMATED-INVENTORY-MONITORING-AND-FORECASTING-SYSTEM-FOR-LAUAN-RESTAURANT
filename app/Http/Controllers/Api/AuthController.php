@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -30,10 +30,9 @@ class AuthController extends Controller
         ], 201);
     }
 
-
     public function login(LoginRequest $request): JsonResponse
     {
-        // Auth Attempt 
+        // Auth Attempt
         if (! Auth::attempt($request->validated())) {
             throw ValidationException::withMessages([
                 'email' => 'Invalid credentials',
@@ -61,6 +60,7 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
+
         return $this->successResponse('Successfully logged out', null);
     }
 }

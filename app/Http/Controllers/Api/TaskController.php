@@ -3,15 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-
 use App\Http\Requests\Api\StoreTaskRequest;
 use App\Http\Requests\Api\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use App\Repositories\TaskRepositoryInterface;
-use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class TaskController extends Controller
@@ -19,13 +18,14 @@ class TaskController extends Controller
     use ApiResponse;
 
     public function __construct(protected TaskRepositoryInterface $taskRepository) {}
+
     /**
- 
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         $tasks = $this->taskRepository->getForUserPaginated($request->user(), 10);
+
         return $this->successResponse(TaskResource::collection($tasks), 'Task retrieved successfully');
     }
 
@@ -35,6 +35,7 @@ class TaskController extends Controller
     public function store(StoreTaskRequest $request)
     {
         $task = $this->taskRepository->createForUser($request->user(), $request->validated());
+
         return $this->successResponse(new TaskResource($task), 'Task created successfully', 201);
     }
 
@@ -42,6 +43,7 @@ class TaskController extends Controller
     {
         $task = $this->taskRepository->find($id);
         Gate::authorize('view', $task);
+
         return $this->successResponse(new TaskResource($task), 'Task retrieved successfully');
     }
 
@@ -65,6 +67,7 @@ class TaskController extends Controller
     {
         Gate::authorize('delete', $task);
         $this->taskRepository->delete($task);
+
         return $this->successResponse(null, 'Task deleted successfully');
     }
 }

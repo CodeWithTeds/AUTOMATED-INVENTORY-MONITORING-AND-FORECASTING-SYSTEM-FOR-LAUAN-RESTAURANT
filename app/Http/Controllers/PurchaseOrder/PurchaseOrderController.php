@@ -5,11 +5,11 @@ namespace App\Http\Controllers\PurchaseOrder;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PurchaseOrder\UpdatePurchaseOrderStatusRequest;
 use App\Services\PurchaseOrder\PurchaseOrderService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PurchaseOrderController extends Controller
 {
@@ -27,13 +27,15 @@ class PurchaseOrderController extends Controller
         return back()->with('success', 'Purchase order status updated.');
     }
 
-    public function receipt(string $purchaseOrder): StreamedResponse
+    public function receipt(string $purchaseOrder)
     {
         $purchaseOrderModel = $this->purchaseOrderService->find((int) $purchaseOrder);
-        $filename = strtolower($purchaseOrderModel->order_number).'-receipt.txt';
+        $filename = strtolower($purchaseOrderModel->order_number).'-receipt.pdf';
 
-        return response()->streamDownload(function () use ($purchaseOrderModel): void {
-            echo $this->purchaseOrderService->receiptText($purchaseOrderModel);
-        }, $filename, ['Content-Type' => 'text/plain']);
+        $pdf = Pdf::loadView('receipts.purchase-order', [
+            'purchaseOrder' => $purchaseOrderModel,
+        ])->setPaper([0, 0, 226.77, 600]); // 80mm width thermal paper approximation
+
+        return $pdf->download($filename);
     }
 }

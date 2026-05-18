@@ -6,6 +6,8 @@ use App\Http\Controllers\Pos\PosController;
 use App\Http\Controllers\Production\ProductionBatchController;
 use App\Http\Controllers\PurchaseOrder\PurchaseOrderController;
 use App\Http\Controllers\Recipe\RecipeBomController;
+use App\Http\Controllers\Report\ReportController;
+use App\Http\Controllers\Sales\SalesController;
 use App\Http\Controllers\Supplier\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -47,8 +49,10 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         ->name('suppliers.report');
     Route::resource('suppliers', SupplierController::class)
         ->only(['index', 'store', 'update', 'destroy']);
-    Route::get('sales', [\App\Http\Controllers\Sales\SalesController::class, 'index'])
+    Route::get('sales', [SalesController::class, 'index'])
         ->name('sales.index');
+    Route::get('report', [ReportController::class, 'index'])
+        ->name('report.index');
 });
 
 require __DIR__.'/settings.php';

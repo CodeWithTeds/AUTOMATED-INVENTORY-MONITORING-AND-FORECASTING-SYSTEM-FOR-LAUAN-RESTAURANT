@@ -12,6 +12,10 @@ use App\Repositories\PurchaseOrder\PurchaseOrderRepository;
 use App\Repositories\PurchaseOrder\PurchaseOrderRepositoryInterface;
 use App\Repositories\Recipe\RecipeBomRepository;
 use App\Repositories\Recipe\RecipeBomRepositoryInterface;
+use App\Repositories\Report\ReportsRepository;
+use App\Repositories\Report\ReportsRepositoryInterface;
+use App\Repositories\Sales\SalesRepository;
+use App\Repositories\Sales\SalesRepositoryInterface;
 use App\Repositories\Supplier\SupplierRepository;
 use App\Repositories\Supplier\SupplierRepositoryInterface;
 use App\Repositories\TaskRepository;
@@ -35,7 +39,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->singleton(PurchaseOrderRepositoryInterface::class, PurchaseOrderRepository::class);
         $this->app->singleton(RecipeBomRepositoryInterface::class, RecipeBomRepository::class);
         $this->app->singleton(SupplierRepositoryInterface::class, SupplierRepository::class);
-        $this->app->singleton(\App\Repositories\Sales\SalesRepositoryInterface::class, \App\Repositories\Sales\SalesRepository::class);
+        $this->app->singleton(SalesRepositoryInterface::class, SalesRepository::class);
+        $this->app->singleton(ReportsRepositoryInterface::class, ReportsRepository::class);
     }
 
     /**

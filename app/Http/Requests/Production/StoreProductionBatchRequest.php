@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Production;
 
 use App\Enums\ProductionBatchStatus;
+use App\Enums\ProductionCategory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,6 +21,7 @@ class StoreProductionBatchRequest extends FormRequest
     {
         return [
             'batch_number' => ['nullable', 'string', 'max:60', 'unique:production_batches,batch_number'],
+            'category' => ['nullable', Rule::enum(ProductionCategory::class)],
             'inventory_item_id' => [
                 'required',
                 'integer',

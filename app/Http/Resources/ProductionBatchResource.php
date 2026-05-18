@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Enums\ProductionBatchStatus;
+use App\Enums\ProductionCategory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,11 +17,17 @@ class ProductionBatchResource extends JsonResource
         $status = $this->status instanceof ProductionBatchStatus
             ? $this->status
             : ProductionBatchStatus::tryFrom((string) $this->status);
+        $category = $this->category instanceof ProductionCategory
+            ? $this->category
+            : ProductionCategory::tryFrom((string) $this->category);
 
         return [
             'id' => $this->id,
             'inventory_item_id' => $this->inventory_item_id,
             'batch_number' => $this->batch_number,
+            'category' => $category?->value ?? $this->category,
+            'category_label' => $category?->label() ?? $this->category,
+            'category_icon' => $category?->icon() ?? '🍽️',
             'product_name' => $this->product?->name,
             'product_sku' => $this->product?->sku,
             'product_unit' => $this->product?->unit,
@@ -31,6 +38,8 @@ class ProductionBatchResource extends JsonResource
             'planned_quantity' => (float) $this->planned_quantity,
             'completed_quantity' => (float) $this->completed_quantity,
             'waste_quantity' => (float) $this->waste_quantity,
+            'portion_size' => (float) $this->portion_size,
+            'portion_unit' => $this->portion_unit,
             'stock_synced_quantity' => (float) $this->stock_synced_quantity,
             'materials' => $this->materials->map(fn ($material): array => [
                 'id' => $material->id,

@@ -12,6 +12,10 @@ enum ProductionCategory: string
     case Tacos = 'tacos';
     case Sushi = 'sushi';
     case RiceMeal = 'rice_meal';
+    case Pork = 'pork';
+    case Beef = 'beef';
+    case Chicken = 'chicken';
+    case Seafood = 'seafood';
 
     public function label(): string
     {
@@ -24,6 +28,10 @@ enum ProductionCategory: string
             self::Tacos => 'Tacos',
             self::Sushi => 'Sushi',
             self::RiceMeal => 'Rice Meal',
+            self::Pork => 'Pork',
+            self::Beef => 'Beef',
+            self::Chicken => 'Chicken',
+            self::Seafood => 'Seafood',
         };
     }
 
@@ -38,6 +46,10 @@ enum ProductionCategory: string
             self::Tacos => '🌮',
             self::Sushi => '🍣',
             self::RiceMeal => '🍛',
+            self::Pork => '🥩',
+            self::Beef => '🍖',
+            self::Chicken => '🍗',
+            self::Seafood => '🐟',
         };
     }
 }

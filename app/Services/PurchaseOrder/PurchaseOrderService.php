@@ -50,11 +50,21 @@ class PurchaseOrderService
         return $this->purchaseOrders->find($id);
     }
 
+    public function updateStatus(int $id, string $status): PurchaseOrder
+    {
+        $purchaseOrder = $this->purchaseOrders->find($id);
+
+        $this->purchaseOrders->updateStatus($purchaseOrder, $status);
+
+        return $purchaseOrder->refresh();
+    }
+
     public function receiptText(PurchaseOrder $purchaseOrder): string
     {
         return implode(PHP_EOL, [
-            'LAUAN RESTAURANT',
-            'PURCHASE ORDER RECEIPT',
+            'CASH RECEIPT',
+            'Lauan POS',
+            'Purchase order copy',
             str_repeat('-', 32),
             "PO Number: {$purchaseOrder->order_number}",
             "Supplier: {$purchaseOrder->supplier_name}",

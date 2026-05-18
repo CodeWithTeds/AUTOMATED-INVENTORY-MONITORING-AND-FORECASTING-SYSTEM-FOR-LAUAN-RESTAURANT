@@ -49,7 +49,35 @@ test('authenticated users can download a purchase order receipt', function (): v
     $response->assertOk();
     expect($response->headers->get('content-disposition'))->toContain('po-2026-002-receipt');
     expect($response->streamedContent())
-        ->toContain('PURCHASE ORDER RECEIPT')
+        ->toContain('CASH RECEIPT')
         ->toContain('Status: Pending')
         ->toContain('Receipt Supplier');
+});
+
+test('authenticated users can update purchase order status', function (): void {
+    $user = User::factory()->create();
+
+    $purchaseOrder = PurchaseOrder::query()->create([
+        'order_number' => 'PO-2026-003',
+        'supplier_name' => 'Status Supplier',
+        'status' => PurchaseOrderStatus::Pending,
+        'items_count' => 1,
+        'total_amount' => 500,
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
+        ->patch("/admin/purchase-orders/{$purchaseOrder->id}/status", [
+            '_token' => 'test-token',
+            'status' => PurchaseOrderStatus::Received->value,
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('purchase_orders', [
+        'id' => $purchaseOrder->id,
+        'status' => PurchaseOrderStatus::Received->value,
+    ]);
+
+    expect($purchaseOrder->refresh()->received_at)->not->toBeNull();
 });

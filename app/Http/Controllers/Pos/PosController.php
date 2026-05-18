@@ -27,10 +27,12 @@ class PosController extends Controller
 
     public function store(StorePosOrderRequest $request): RedirectResponse
     {
-        $order = $this->posOrderService->create($request->validated(), (int) $request->user()->id);
+        $result = $this->posOrderService->create($request->validated(), (int) $request->user()->id);
+        $receipt = PosOrderResource::make($result['order'])->resolve($request);
+        $receipt['purchase_order_receipt_url'] = route('purchase-orders.receipt', $result['purchaseOrder'], false);
 
         return back()
             ->with('success', 'Cash order completed. Receipt is ready and stock was deducted.')
-            ->with('receipt', PosOrderResource::make($order)->resolve($request));
+            ->with('receipt', $receipt);
     }
 }

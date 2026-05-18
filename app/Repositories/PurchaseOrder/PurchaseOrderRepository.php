@@ -26,6 +26,16 @@ class PurchaseOrderRepository implements PurchaseOrderRepositoryInterface
         return PurchaseOrder::query()->findOrFail($id);
     }
 
+    public function updateStatus(PurchaseOrder $purchaseOrder, string $status): bool
+    {
+        return $purchaseOrder->update([
+            'status' => $status,
+            'received_at' => $status === PurchaseOrderStatus::Received->value
+                ? ($purchaseOrder->received_at ?? now()->toDateString())
+                : null,
+        ]);
+    }
+
     /**
      * @return Collection<int, PurchaseOrder>
      */

@@ -37,6 +37,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         ->name('pos.orders.store');
     Route::get('purchase-orders', [PurchaseOrderController::class, 'index'])
         ->name('purchase-orders.index');
+    Route::patch('purchase-orders/{purchase_order}/status', [PurchaseOrderController::class, 'updateStatus'])
+        ->name('purchase-orders.status');
     Route::get('purchase-orders/{purchase_order}/receipt', [PurchaseOrderController::class, 'receipt'])
         ->name('purchase-orders.receipt');
     Route::resource('recipes', RecipeBomController::class)

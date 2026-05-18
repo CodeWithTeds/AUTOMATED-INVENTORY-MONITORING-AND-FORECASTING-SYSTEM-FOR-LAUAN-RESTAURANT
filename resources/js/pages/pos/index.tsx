@@ -4,6 +4,7 @@ import {
     Banknote,
     CheckCircle2,
     Clock3,
+    Download,
     ImageIcon,
     Minus,
     PackageCheck,
@@ -26,11 +27,13 @@ import type {
     PosOrderFormData,
     PosProduct,
     PosSummary,
+    PurchaseOrder,
 } from './types';
 
 type Props = {
     products: PosProduct[];
     recentOrders: PosOrder[];
+    purchaseOrders: PurchaseOrder[];
     summary: PosSummary;
     paymentMethodOptions: PaymentMethodOption[];
 };
@@ -85,7 +88,7 @@ function orderTone(index: number) {
 
 export default function PosIndex({
     products: initialProducts,
-    recentOrders,
+    purchaseOrders,
     summary,
     paymentMethodOptions,
 }: Props) {
@@ -307,6 +310,17 @@ export default function PosIndex({
                                 <p className="mt-0.5 text-xs text-[#040404]/55">
                                     {toastMessage}
                                 </p>
+                                {receipt?.purchase_order_receipt_url && (
+                                    <a
+                                        href={
+                                            receipt.purchase_order_receipt_url
+                                        }
+                                        className="mt-2 inline-flex h-7 items-center gap-1.5 border border-[#2ec66d] px-2 text-xs font-semibold text-[#040404] transition hover:text-[#2ec66d]"
+                                    >
+                                        <Download className="size-3.5" />
+                                        Download receipt
+                                    </a>
+                                )}
                             </div>
                             <button
                                 type="button"
@@ -405,6 +419,15 @@ export default function PosIndex({
                             <p className="mt-4 text-center text-lg font-bold tracking-[0.16em]">
                                 THANK YOU
                             </p>
+                            {receipt.purchase_order_receipt_url && (
+                                <a
+                                    href={receipt.purchase_order_receipt_url}
+                                    className="mt-3 inline-flex h-8 w-full items-center justify-center gap-1.5 border border-[#111]/45 text-[11px] font-bold tracking-normal transition hover:bg-[#111] hover:text-[#f7f4ee]"
+                                >
+                                    <Download className="size-3.5" />
+                                    DOWNLOAD RECEIPT
+                                </a>
+                            )}
                             <div className="mt-2 flex h-10 items-end justify-center gap-[3px]">
                                 {Array.from({ length: 34 }).map((_, index) => (
                                     <span
@@ -487,7 +510,9 @@ export default function PosIndex({
                                     </div>
                                 </div>
                                 <div className="flex gap-5 overflow-x-auto pb-2">
-                                    {recentOrders.slice(0, 4).map((order, index) => (
+                                    {purchaseOrders
+                                        .slice(0, 4)
+                                        .map((order, index) => (
                                         <article
                                             key={order.id}
                                             className="flex min-w-56 items-center gap-3"
@@ -503,17 +528,17 @@ export default function PosIndex({
                                                         'Walk-in'}
                                                 </p>
                                                 <p className="text-sm text-[#040404]/45">
-                                                    {order.items.length} items
+                                                    {order.items_count} items
                                                 </p>
                                             </div>
                                             <ArrowRight className="size-5 shrink-0" />
-                                            <Badge className="border-0 bg-[#2ec66d] text-white hover:bg-[#2ec66d]">
-                                                Ready
+                                            <Badge className="border-0 bg-[#faa340] text-[#040404] hover:bg-[#faa340]">
+                                                {order.status_label}
                                             </Badge>
                                         </article>
-                                    ))}
+                                        ))}
 
-                                    {recentOrders.length === 0 && (
+                                    {purchaseOrders.length === 0 && (
                                         <article className="flex min-w-56 items-center gap-3">
                                             <span className="grid size-12 place-items-center bg-[#2ec66d] text-lg font-bold text-white">
                                                 T1

@@ -3,7 +3,6 @@ import { Download, PackageCheck, Search, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import type {
@@ -59,6 +58,17 @@ export default function PurchaseOrdersIndex({
             preserveState: true,
             replace: true,
         });
+    };
+
+    const updateStatus = (orderId: number, status: string) => {
+        router.patch(
+            `/admin/purchase-orders/${orderId}/status`,
+            { status },
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
     };
 
     return (
@@ -175,15 +185,26 @@ export default function PurchaseOrdersIndex({
                                             {order.supplier_name}
                                         </td>
                                         <td className="px-3 py-2">
-                                            <Badge
-                                                variant="outline"
-                                                className={
-                                                    statusTone[order.status] ??
-                                                    statusTone.pending
+                                            <select
+                                                value={order.status}
+                                                onChange={(event) =>
+                                                    updateStatus(
+                                                        order.id,
+                                                        event.target.value,
+                                                    )
                                                 }
+                                                className={`h-8 rounded-md border px-2 text-xs font-semibold outline-none focus:border-[#faa340] focus:ring-3 focus:ring-[#faa340]/20 ${statusTone[order.status] ?? statusTone.pending}`}
+                                                aria-label={`Update status for ${order.order_number}`}
                                             >
-                                                {order.status_label}
-                                            </Badge>
+                                                {statusOptions.map((option) => (
+                                                    <option
+                                                        key={option.value}
+                                                        value={option.value}
+                                                    >
+                                                        {option.label}
+                                                    </option>
+                                                ))}
+                                            </select>
                                         </td>
                                         <td className="px-3 py-2 text-[#040404]/70">
                                             {order.items_count}

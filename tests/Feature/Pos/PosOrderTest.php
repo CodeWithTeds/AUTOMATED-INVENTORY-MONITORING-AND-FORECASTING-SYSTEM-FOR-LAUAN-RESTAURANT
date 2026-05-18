@@ -8,7 +8,9 @@ use App\Enums\ProductionBatchStatus;
 use App\Enums\PurchaseOrderStatus;
 use App\Models\InventoryItem;
 use App\Models\ProductionBatch;
+use App\Models\PurchaseOrder;
 use App\Models\User;
+use Inertia\Testing\AssertableInertia as Assert;
 
 function posInventoryItem(array $attributes = []): InventoryItem
 {
@@ -65,9 +67,21 @@ test('authenticated users can view the POS module', function (): void {
 
     $this->withoutVite();
 
+    PurchaseOrder::query()->create([
+        'order_number' => 'POS-PO-001',
+        'supplier_name' => 'Pending Counter',
+        'status' => PurchaseOrderStatus::Pending,
+        'items_count' => 2,
+        'total_amount' => 240,
+    ]);
+
     $this->actingAs($user)
         ->get('/admin/pos')
-        ->assertOk();
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('pos/index')
+            ->where('purchaseOrders.0.status', PurchaseOrderStatus::Pending->value)
+            ->where('purchaseOrders.0.status_label', 'Pending'));
 });
 
 test('POS product feed uses completed production menu items and latest price', function (): void {
@@ -127,7 +141,8 @@ test('POS checkout stores order snapshots and deducts completed production stock
         ->assertSessionHas('success')
         ->assertSessionHas('receipt', fn (array $receipt): bool => $receipt['customer_name'] === 'Maria Santos'
             && $receipt['payment_method'] === PosPaymentMethod::Cash->value
-            && (float) $receipt['total_amount'] === 240.0);
+            && (float) $receipt['total_amount'] === 240.0
+            && str_contains((string) $receipt['purchase_order_receipt_url'], '/admin/purchase-orders/'));
 
     expect((float) $menuItem->refresh()->current_stock)->toBe(3.0);
 

@@ -16,6 +16,8 @@ interface PurchaseOrderRepositoryInterface
 
     public function find(int $id): PurchaseOrder;
 
+    public function updateStatus(PurchaseOrder $purchaseOrder, string $status): bool;
+
     /**
      * @return Collection<int, PurchaseOrder>
      */

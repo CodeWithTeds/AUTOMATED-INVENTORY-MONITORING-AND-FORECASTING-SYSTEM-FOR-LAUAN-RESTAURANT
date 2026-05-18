@@ -9,6 +9,7 @@ use App\Http\Resources\PosProductResource;
 use App\Http\Resources\PurchaseOrderResource;
 use App\Models\InventoryItem;
 use App\Models\PosOrder;
+use App\Models\PurchaseOrder;
 use App\Repositories\Inventory\InventoryItemRepositoryInterface;
 use App\Repositories\Pos\PosOrderRepositoryInterface;
 use App\Repositories\PurchaseOrder\PurchaseOrderRepositoryInterface;
@@ -48,10 +49,11 @@ class PosOrderService
 
     /**
      * @param  array<string, mixed>  $attributes
+     * @return array{order: PosOrder, purchaseOrder: PurchaseOrder}
      */
-    public function create(array $attributes, int $userId): PosOrder
+    public function create(array $attributes, int $userId): array
     {
-        return DB::transaction(function () use ($attributes, $userId): PosOrder {
+        return DB::transaction(function () use ($attributes, $userId): array {
             $items = collect($attributes['items']);
             $productIds = $items->pluck('inventory_item_id')->map(fn ($id): int => (int) $id)->all();
             $products = $this->posOrderRepository->sellableProductsForCheckout($productIds);
@@ -121,9 +123,12 @@ class PosOrderService
             $this->posOrderRepository->createItems($order, $orderItems);
 
             $order = $order->refresh()->load(['items', 'cashier:id,name']);
-            $this->purchaseOrderRepository->createFromPosOrder($order);
+            $purchaseOrder = $this->purchaseOrderRepository->createFromPosOrder($order);
 
-            return $order;
+            return [
+                'order' => $order,
+                'purchaseOrder' => $purchaseOrder,
+            ];
         });
     }
 

@@ -39,6 +39,7 @@ export type PosOrder = {
     change_amount: number;
     paid_at: string | null;
     cashier_name: string | null;
+    purchase_order_receipt_url?: string | null;
     items: PosOrderItem[];
 };
 

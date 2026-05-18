@@ -22,5 +22,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(InventoryItemSeeder::class);
+        $this->call(LauanProductionMenuSeeder::class);
     }
 }

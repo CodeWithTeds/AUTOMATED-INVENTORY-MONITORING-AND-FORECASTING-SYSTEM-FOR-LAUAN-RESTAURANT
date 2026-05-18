@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ProductionBatchStatus;
+use App\Enums\ProductionCategory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,9 +14,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable([
     'inventory_item_id',
     'batch_number',
+    'category',
     'planned_quantity',
     'completed_quantity',
     'waste_quantity',
+    'portion_size',
+    'portion_unit',
     'stock_synced_quantity',
     'production_area',
     'planned_start_date',
@@ -31,9 +35,11 @@ class ProductionBatch extends Model
 
     protected $casts = [
         'status' => ProductionBatchStatus::class,
+        'category' => ProductionCategory::class,
         'planned_quantity' => 'decimal:2',
         'completed_quantity' => 'decimal:2',
         'waste_quantity' => 'decimal:2',
+        'portion_size' => 'decimal:2',
         'stock_synced_quantity' => 'decimal:2',
         'planned_start_date' => 'date',
         'target_completion_date' => 'date',

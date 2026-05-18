@@ -15,7 +15,7 @@ class ProductionBatchRepository implements ProductionBatchRepositoryInterface
      */
     public function paginateForProduction(array $filters, int $perPage = 15): LengthAwarePaginator
     {
-        $sortable = ['batch_number', 'planned_quantity', 'completed_quantity', 'planned_start_date', 'completed_at', 'status'];
+        $sortable = ['batch_number', 'category', 'planned_quantity', 'completed_quantity', 'planned_start_date', 'completed_at', 'status'];
         $sort = in_array($filters['sort'] ?? '', $sortable, true) ? $filters['sort'] : 'planned_start_date';
         $direction = ($filters['direction'] ?? '') === 'asc' ? 'asc' : 'desc';
 
@@ -33,6 +33,7 @@ class ProductionBatchRepository implements ProductionBatchRepositoryInterface
                         });
                 });
             })
+            ->when($filters['category'] ?? null, fn (Builder $query, string $category) => $query->where('category', $category))
             ->when($filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
             ->when($filters['production_area'] ?? null, fn (Builder $query, string $area) => $query->where('production_area', $area))
             ->orderBy($sort, $direction)

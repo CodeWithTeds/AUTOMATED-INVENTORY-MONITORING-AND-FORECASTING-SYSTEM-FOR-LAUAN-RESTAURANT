@@ -4,8 +4,12 @@ namespace App\Providers;
 
 use App\Repositories\Inventory\InventoryItemRepository;
 use App\Repositories\Inventory\InventoryItemRepositoryInterface;
+use App\Repositories\Pos\PosOrderRepository;
+use App\Repositories\Pos\PosOrderRepositoryInterface;
 use App\Repositories\Production\ProductionBatchRepository;
 use App\Repositories\Production\ProductionBatchRepositoryInterface;
+use App\Repositories\PurchaseOrder\PurchaseOrderRepository;
+use App\Repositories\PurchaseOrder\PurchaseOrderRepositoryInterface;
 use App\Repositories\Recipe\RecipeBomRepository;
 use App\Repositories\Recipe\RecipeBomRepositoryInterface;
 use App\Repositories\Supplier\SupplierRepository;
@@ -26,7 +30,9 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->singleton(TaskRepositoryInterface::class, TaskRepository::class);
         $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);
         $this->app->singleton(InventoryItemRepositoryInterface::class, InventoryItemRepository::class);
+        $this->app->singleton(PosOrderRepositoryInterface::class, PosOrderRepository::class);
         $this->app->singleton(ProductionBatchRepositoryInterface::class, ProductionBatchRepository::class);
+        $this->app->singleton(PurchaseOrderRepositoryInterface::class, PurchaseOrderRepository::class);
         $this->app->singleton(RecipeBomRepositoryInterface::class, RecipeBomRepository::class);
         $this->app->singleton(SupplierRepositoryInterface::class, SupplierRepository::class);
     }

@@ -3,6 +3,7 @@
 namespace App\Services\Production;
 
 use App\Enums\ProductionBatchStatus;
+use App\Enums\ProductionCategory;
 use App\Http\Resources\ProductionBatchResource;
 use App\Models\InventoryItem;
 use App\Models\ProductionBatch;
@@ -35,6 +36,7 @@ class ProductionBatchService
             'filters' => $normalizedFilters,
             'summary' => $this->productionBatchRepository->summary(),
             'menuItemOptions' => $this->recipeBomRepository->menuItemOptions(),
+            'categoryOptions' => $this->productionCategoryOptions(),
             'statusOptions' => $this->enumOptions(ProductionBatchStatus::cases()),
         ];
     }
@@ -99,6 +101,18 @@ class ProductionBatchService
     }
 
     /**
+     * @return array<int, array{value: string, label: string, icon: string}>
+     */
+    private function productionCategoryOptions(): array
+    {
+        return array_map(fn (ProductionCategory $case): array => [
+            'value' => $case->value,
+            'label' => $case->label(),
+            'icon' => $case->icon(),
+        ], ProductionCategory::cases());
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function paginatedBatches(LengthAwarePaginator $paginator): array
@@ -156,6 +170,7 @@ class ProductionBatchService
         $attributes['planned_quantity'] ??= 0;
         $attributes['completed_quantity'] ??= 0;
         $attributes['waste_quantity'] ??= 0;
+        $attributes['category'] ??= ProductionCategory::AllMenu->value;
         $attributes['batch_number'] = empty($attributes['batch_number'])
             ? ($productionBatch?->batch_number ?? $this->productionBatchRepository->nextBatchNumber((int) now()->format('Y')))
             : $attributes['batch_number'];

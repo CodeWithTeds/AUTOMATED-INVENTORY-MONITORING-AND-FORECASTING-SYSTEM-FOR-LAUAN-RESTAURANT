@@ -734,9 +734,24 @@ export default function PosIndex({
                                         key={line.productId}
                                         className="grid grid-cols-[42px_minmax(0,1fr)_auto] gap-3"
                                     >
-                                        <span className="grid size-10 place-items-center bg-[#040404] text-sm font-bold text-white">
-                                            {number.format(line.quantity)}X
-                                        </span>
+                                        <div className="relative size-10 shrink-0 bg-[#eef2f3] overflow-hidden">
+                                            {product?.image_url ? (
+                                                <img
+                                                    src={product.image_url}
+                                                    alt={product.name}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <span className="grid h-full w-full place-items-center bg-[#040404] text-xs font-bold text-white">
+                                                    {number.format(line.quantity)}X
+                                                </span>
+                                            )}
+                                            {product?.image_url && (
+                                                <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#040404] px-1 text-[9px] font-bold text-white shadow-xs">
+                                                    {number.format(line.quantity)}
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="min-w-0">
                                             <p className="line-clamp-2 text-sm font-semibold">
                                                 {product?.name ??
@@ -773,6 +788,9 @@ export default function PosIndex({
                                                 >
                                                     <Minus className="size-3.5" />
                                                 </button>
+                                                <span className="w-6 text-center text-xs font-semibold text-[#040404]">
+                                                    {number.format(line.quantity)}
+                                                </span>
                                                 <button
                                                     type="button"
                                                     onClick={() =>

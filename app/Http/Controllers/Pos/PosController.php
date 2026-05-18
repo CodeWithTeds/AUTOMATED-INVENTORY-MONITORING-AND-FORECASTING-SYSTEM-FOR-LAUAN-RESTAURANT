@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pos;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Pos\StorePosOrderRequest;
+use App\Http\Resources\PosOrderResource;
 use App\Services\Pos\PosOrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -26,8 +27,10 @@ class PosController extends Controller
 
     public function store(StorePosOrderRequest $request): RedirectResponse
     {
-        $this->posOrderService->create($request->validated(), (int) $request->user()->id);
+        $order = $this->posOrderService->create($request->validated(), (int) $request->user()->id);
 
-        return back()->with('success', 'POS order completed and stock deducted.');
+        return back()
+            ->with('success', 'Cash order completed. Receipt is ready and stock was deducted.')
+            ->with('receipt', PosOrderResource::make($order)->resolve($request));
     }
 }

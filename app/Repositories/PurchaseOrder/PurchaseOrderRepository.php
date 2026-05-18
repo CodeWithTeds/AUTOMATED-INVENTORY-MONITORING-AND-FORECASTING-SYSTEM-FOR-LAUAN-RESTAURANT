@@ -3,6 +3,7 @@
 namespace App\Repositories\PurchaseOrder;
 
 use App\Enums\PurchaseOrderStatus;
+use App\Models\PosOrder;
 use App\Models\PurchaseOrder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,6 +21,11 @@ class PurchaseOrderRepository implements PurchaseOrderRepositoryInterface
             ->withQueryString();
     }
 
+    public function find(int $id): PurchaseOrder
+    {
+        return PurchaseOrder::query()->findOrFail($id);
+    }
+
     /**
      * @return Collection<int, PurchaseOrder>
      */
@@ -27,6 +33,7 @@ class PurchaseOrderRepository implements PurchaseOrderRepositoryInterface
     {
         return PurchaseOrder::query()
             ->whereIn('status', [
+                PurchaseOrderStatus::Pending->value,
                 PurchaseOrderStatus::Draft->value,
                 PurchaseOrderStatus::Ordered->value,
                 PurchaseOrderStatus::PartiallyReceived->value,
@@ -47,6 +54,7 @@ class PurchaseOrderRepository implements PurchaseOrderRepositoryInterface
             'total' => PurchaseOrder::query()->count(),
             'open' => PurchaseOrder::query()
                 ->whereIn('status', [
+                    PurchaseOrderStatus::Pending->value,
                     PurchaseOrderStatus::Draft->value,
                     PurchaseOrderStatus::Ordered->value,
                     PurchaseOrderStatus::PartiallyReceived->value,
@@ -55,12 +63,38 @@ class PurchaseOrderRepository implements PurchaseOrderRepositoryInterface
             'received' => PurchaseOrder::query()->where('status', PurchaseOrderStatus::Received->value)->count(),
             'open_value' => (float) PurchaseOrder::query()
                 ->whereIn('status', [
+                    PurchaseOrderStatus::Pending->value,
                     PurchaseOrderStatus::Draft->value,
                     PurchaseOrderStatus::Ordered->value,
                     PurchaseOrderStatus::PartiallyReceived->value,
                 ])
                 ->sum('total_amount'),
         ];
+    }
+
+    public function createFromPosOrder(PosOrder $order): PurchaseOrder
+    {
+        $order->loadMissing('items');
+
+        $purchaseOrder = PurchaseOrder::withTrashed()->updateOrCreate(
+            ['order_number' => $order->order_number],
+            [
+                'supplier_name' => $order->customer_name ?: 'Walk-in Customer',
+                'status' => PurchaseOrderStatus::Pending,
+                'items_count' => (int) $order->items->sum('quantity'),
+                'total_amount' => $order->total_amount,
+                'ordered_at' => $order->paid_at?->toDateString() ?? now()->toDateString(),
+                'expected_at' => $order->paid_at?->toDateString() ?? now()->toDateString(),
+                'received_at' => null,
+                'notes' => "Generated from POS cash receipt {$order->order_number}.",
+            ],
+        );
+
+        if ($purchaseOrder->trashed()) {
+            $purchaseOrder->restore();
+        }
+
+        return $purchaseOrder;
     }
 
     /**

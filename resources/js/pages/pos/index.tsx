@@ -1,7 +1,8 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
     Banknote,
+    CheckCircle2,
     Clock3,
     ImageIcon,
     Minus,
@@ -11,6 +12,7 @@ import {
     Search,
     Trash2,
     UserRound,
+    X,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
@@ -31,6 +33,11 @@ type Props = {
     recentOrders: PosOrder[];
     summary: PosSummary;
     paymentMethodOptions: PaymentMethodOption[];
+};
+
+type FlashProps = {
+    success?: string | null;
+    receipt?: PosOrder | null;
 };
 
 type CartLine = {
@@ -82,10 +89,14 @@ export default function PosIndex({
     summary,
     paymentMethodOptions,
 }: Props) {
+    const { props } = usePage();
+    const flash = props.flash as FlashProps | undefined;
     const [products, setProducts] = useState(initialProducts);
     const [query, setQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all_menu');
     const [cart, setCart] = useState<CartLine[]>([]);
+    const [dismissedReceiptNumber, setDismissedReceiptNumber] = useState('');
+    const [dismissedToastKey, setDismissedToastKey] = useState('');
     const [lastSyncedAt, setLastSyncedAt] = useState(() => new Date());
     const firstPaymentMethod = paymentMethodOptions[0]?.value ?? 'cash';
     const { data, setData, post, processing, errors, clearErrors } =
@@ -154,6 +165,20 @@ export default function PosIndex({
     const hasUnavailableLines = cartLines.some(
         (line) => !line.product || line.quantity > line.product.current_stock,
     );
+    const flashReceipt = flash?.receipt ?? null;
+    const flashToastKey = flashReceipt?.order_number ?? flash?.success ?? '';
+    const receipt =
+        flashReceipt && dismissedReceiptNumber !== flashReceipt.order_number
+            ? flashReceipt
+            : null;
+    const toastMessage =
+        flash?.success && dismissedToastKey !== flashToastKey
+            ? flash.success
+            : '';
+
+    useEffect(() => {
+        setData('payment_method', firstPaymentMethod);
+    }, [firstPaymentMethod, setData]);
 
     useEffect(() => {
         setData(
@@ -164,6 +189,19 @@ export default function PosIndex({
             })),
         );
     }, [cart, setData]);
+
+    useEffect(() => {
+        if (!toastMessage || !flashToastKey) {
+            return;
+        }
+
+        const timer = window.setTimeout(
+            () => setDismissedToastKey(flashToastKey),
+            5000,
+        );
+
+        return () => window.clearTimeout(timer);
+    }, [flashToastKey, toastMessage]);
 
     useEffect(() => {
         const loadProducts = async () => {
@@ -254,6 +292,134 @@ export default function PosIndex({
     return (
         <>
             <Head title="POS" />
+
+            {(toastMessage || receipt) && (
+                <div className="fixed top-4 right-4 z-50 w-[min(360px,calc(100vw-2rem))] space-y-3">
+                    {toastMessage && (
+                        <div className="flex items-start gap-3 border border-[#2ec66d]/20 bg-white p-3 shadow-lg">
+                            <span className="grid size-9 shrink-0 place-items-center bg-[#2ec66d] text-white">
+                                <CheckCircle2 className="size-5" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-sm font-semibold text-[#040404]">
+                                    Successful cash order
+                                </p>
+                                <p className="mt-0.5 text-xs text-[#040404]/55">
+                                    {toastMessage}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setDismissedToastKey(flashToastKey)
+                                }
+                                className="grid size-7 shrink-0 place-items-center text-[#040404]/45 hover:text-[#040404]"
+                                aria-label="Dismiss order success toast"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+                    )}
+
+                    {receipt && (
+                        <article className="bg-[#f7f4ee] px-5 py-4 font-mono text-[#111] shadow-2xl">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="text-center">
+                                    <p className="text-base font-bold tracking-[0.16em]">
+                                        CASH RECEIPT
+                                    </p>
+                                    <p className="mt-1 text-[11px]">
+                                        Lauan POS
+                                    </p>
+                                    <p className="text-[11px]">
+                                        Cash only counter
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setDismissedReceiptNumber(
+                                            receipt.order_number,
+                                        )
+                                    }
+                                    className="grid size-7 shrink-0 place-items-center text-[#111]/45 hover:text-[#111]"
+                                    aria-label="Close receipt"
+                                >
+                                    <X className="size-4" />
+                                </button>
+                            </div>
+
+                            <div className="my-3 border-t border-b border-dashed border-[#111]/35 py-2 text-[11px]">
+                                <div className="flex justify-between gap-3">
+                                    <span>Date:</span>
+                                    <span>{receipt.paid_at ?? 'Just now'}</span>
+                                </div>
+                                <div className="flex justify-between gap-3">
+                                    <span>No:</span>
+                                    <span>{receipt.order_number}</span>
+                                </div>
+                                <div className="flex justify-between gap-3">
+                                    <span>Name:</span>
+                                    <span className="truncate">
+                                        {receipt.customer_name ?? 'Walk-in'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1 text-[11px]">
+                                {receipt.items.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className="grid grid-cols-[34px_minmax(0,1fr)_auto] gap-2"
+                                    >
+                                        <span>
+                                            {number.format(item.quantity)}x
+                                        </span>
+                                        <span className="truncate">
+                                            {item.item_name}
+                                        </span>
+                                        <span>{money(item.line_total)}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="mt-3 border-t border-dashed border-[#111]/35 pt-2 text-[11px]">
+                                <div className="flex justify-between">
+                                    <span>Sub-total</span>
+                                    <span>{money(receipt.subtotal_amount)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Cash</span>
+                                    <span>{money(receipt.amount_paid)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Change</span>
+                                    <span>{money(receipt.change_amount)}</span>
+                                </div>
+                                <div className="mt-2 flex justify-between text-base font-bold">
+                                    <span>Total</span>
+                                    <span>{money(receipt.total_amount)}</span>
+                                </div>
+                            </div>
+
+                            <p className="mt-4 text-center text-lg font-bold tracking-[0.16em]">
+                                THANK YOU
+                            </p>
+                            <div className="mt-2 flex h-10 items-end justify-center gap-[3px]">
+                                {Array.from({ length: 34 }).map((_, index) => (
+                                    <span
+                                        key={index}
+                                        className="w-[2px] bg-[#111]"
+                                        style={{
+                                            height: `${18 + ((index * 7) % 21)}px`,
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        </article>
+                    )}
+                </div>
+            )}
 
             <main className="min-h-screen text-[#040404]">
                 <header className="sticky top-0 z-20 border-b border-[#040404]/8 bg-white px-4 py-3 sm:px-6">
@@ -654,31 +820,26 @@ export default function PosIndex({
                         </div>
 
                         <div className="mt-5 grid gap-3">
-                            <label>
+                            <div>
                                 <span className="mb-1 flex items-center gap-1.5 text-xs font-medium text-[#040404]/55">
                                     <ReceiptText className="size-3.5" />
                                     Payment
                                 </span>
-                                <select
-                                    value={data.payment_method}
-                                    onChange={(event) =>
-                                        setData(
-                                            'payment_method',
-                                            event.target.value,
-                                        )
-                                    }
-                                    className="h-10 w-full rounded-md border border-[#040404]/10 px-3 text-sm text-[#040404] outline-none focus:border-[#faa340] focus:ring-3 focus:ring-[#faa340]/20"
-                                >
-                                    {paymentMethodOptions.map((option) => (
-                                        <option
-                                            key={option.value}
-                                            value={option.value}
-                                        >
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
+                                <div className="flex h-10 items-center justify-between border border-[#040404]/10 px-3 text-sm">
+                                    <span className="flex items-center gap-2 font-medium">
+                                        <Banknote className="size-4 text-[#2ec66d]" />
+                                        Cash only
+                                    </span>
+                                    <Badge className="border-0 bg-[#2ec66d] text-white hover:bg-[#2ec66d]">
+                                        Cash
+                                    </Badge>
+                                </div>
+                                {errors.payment_method && (
+                                    <p className="mt-1 text-xs text-red-600">
+                                        {errors.payment_method}
+                                    </p>
+                                )}
+                            </div>
 
                             <label>
                                 <span className="mb-1 flex items-center gap-1.5 text-xs font-medium text-[#040404]/55">

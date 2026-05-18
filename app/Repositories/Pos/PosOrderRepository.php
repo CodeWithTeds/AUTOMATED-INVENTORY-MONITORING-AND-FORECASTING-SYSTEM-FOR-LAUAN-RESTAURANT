@@ -75,8 +75,10 @@ class PosOrderRepository implements PosOrderRepositoryInterface
     {
         return PosOrder::query()
             ->with(['items', 'cashier:id,name'])
-            ->latest('paid_at')
-            ->latest()
+            ->where('status', PosOrderStatus::Paid->value)
+            ->whereDate('paid_at', today())
+            ->oldest('paid_at')
+            ->oldest()
             ->limit($limit)
             ->get();
     }

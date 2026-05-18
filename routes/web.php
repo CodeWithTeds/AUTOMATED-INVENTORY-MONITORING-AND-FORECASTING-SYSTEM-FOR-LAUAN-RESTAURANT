@@ -37,6 +37,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         ->name('pos.orders.store');
     Route::get('purchase-orders', [PurchaseOrderController::class, 'index'])
         ->name('purchase-orders.index');
+    Route::get('purchase-orders/{purchase_order}/receipt', [PurchaseOrderController::class, 'receipt'])
+        ->name('purchase-orders.receipt');
     Route::resource('recipes', RecipeBomController::class)
         ->only(['index', 'store', 'update', 'destroy']);
     Route::get('suppliers/report', [SupplierController::class, 'report'])

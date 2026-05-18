@@ -2,6 +2,7 @@
 
 namespace App\Repositories\PurchaseOrder;
 
+use App\Models\PosOrder;
 use App\Models\PurchaseOrder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -13,6 +14,8 @@ interface PurchaseOrderRepositoryInterface
      */
     public function paginate(array $filters, int $perPage = 12): LengthAwarePaginator;
 
+    public function find(int $id): PurchaseOrder;
+
     /**
      * @return Collection<int, PurchaseOrder>
      */
@@ -22,4 +25,6 @@ interface PurchaseOrderRepositoryInterface
      * @return array<string, float|int>
      */
     public function summary(): array;
+
+    public function createFromPosOrder(PosOrder $order): PurchaseOrder;
 }

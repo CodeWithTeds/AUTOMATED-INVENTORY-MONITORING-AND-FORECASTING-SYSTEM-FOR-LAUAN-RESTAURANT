@@ -120,7 +120,10 @@ class PosOrderService
 
             $this->posOrderRepository->createItems($order, $orderItems);
 
-            return $order->refresh()->load(['items', 'cashier:id,name']);
+            $order = $order->refresh()->load(['items', 'cashier:id,name']);
+            $this->purchaseOrderRepository->createFromPosOrder($order);
+
+            return $order;
         });
     }
 
@@ -129,9 +132,11 @@ class PosOrderService
      */
     private function paymentMethodOptions(): array
     {
-        return array_map(fn ($case): array => [
-            'value' => $case->value,
-            'label' => $case->label(),
-        ], PosPaymentMethod::cases());
+        return [
+            [
+                'value' => PosPaymentMethod::Cash->value,
+                'label' => PosPaymentMethod::Cash->label(),
+            ],
+        ];
     }
 }

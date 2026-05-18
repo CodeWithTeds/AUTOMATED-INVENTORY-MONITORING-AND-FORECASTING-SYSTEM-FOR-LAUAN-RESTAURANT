@@ -13,7 +13,7 @@ return new class extends Migration
             $table->id();
             $table->string('order_number')->unique();
             $table->string('supplier_name');
-            $table->string('status')->default(PurchaseOrderStatus::Draft->value);
+            $table->string('status')->default(PurchaseOrderStatus::Pending->value);
             $table->unsignedInteger('items_count')->default(0);
             $table->decimal('total_amount', 10, 2)->default(0);
             $table->date('ordered_at')->nullable();

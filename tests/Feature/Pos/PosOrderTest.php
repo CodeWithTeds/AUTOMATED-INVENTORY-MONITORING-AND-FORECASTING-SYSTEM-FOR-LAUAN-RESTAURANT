@@ -5,6 +5,7 @@ use App\Enums\InventoryItemStatus;
 use App\Enums\PosOrderStatus;
 use App\Enums\PosPaymentMethod;
 use App\Enums\ProductionBatchStatus;
+use App\Enums\PurchaseOrderStatus;
 use App\Models\InventoryItem;
 use App\Models\ProductionBatch;
 use App\Models\User;
@@ -122,7 +123,11 @@ test('POS checkout stores order snapshots and deducts completed production stock
             ],
         ])
         ->assertRedirect()
-        ->assertSessionHasNoErrors();
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('success')
+        ->assertSessionHas('receipt', fn (array $receipt): bool => $receipt['customer_name'] === 'Maria Santos'
+            && $receipt['payment_method'] === PosPaymentMethod::Cash->value
+            && (float) $receipt['total_amount'] === 240.0);
 
     expect((float) $menuItem->refresh()->current_stock)->toBe(3.0);
 
@@ -142,6 +147,13 @@ test('POS checkout stores order snapshots and deducts completed production stock
         'quantity' => 2,
         'unit_price' => 120,
         'line_total' => 240,
+    ]);
+    $this->assertDatabaseHas('purchase_orders', [
+        'supplier_name' => 'Maria Santos',
+        'status' => PurchaseOrderStatus::Pending->value,
+        'items_count' => 2,
+        'total_amount' => 240,
+        'notes' => 'Generated from POS cash receipt POS-'.now()->format('Ymd').'-0001.',
     ]);
 });
 
@@ -171,4 +183,33 @@ test('POS checkout rejects quantities above available stock', function (): void 
 
     expect((float) $menuItem->refresh()->current_stock)->toBe(1.0);
     $this->assertDatabaseCount('pos_orders', 0);
+});
+
+test('POS checkout accepts cash only', function (): void {
+    $user = User::factory()->create();
+    $menuItem = posMenuItem([
+        'current_stock' => 3,
+        'selling_price' => 90,
+    ]);
+    completedPosProduction($menuItem, 3);
+
+    $this->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
+        ->post('/admin/pos/orders', [
+            '_token' => 'test-token',
+            'customer_name' => 'Cash Counter',
+            'payment_method' => PosPaymentMethod::GCash->value,
+            'amount_paid' => 90,
+            'items' => [
+                [
+                    'inventory_item_id' => $menuItem->id,
+                    'quantity' => 1,
+                ],
+            ],
+        ])
+        ->assertSessionHasErrors('payment_method');
+
+    expect((float) $menuItem->refresh()->current_stock)->toBe(3.0);
+    $this->assertDatabaseCount('pos_orders', 0);
+    $this->assertDatabaseCount('purchase_orders', 0);
 });

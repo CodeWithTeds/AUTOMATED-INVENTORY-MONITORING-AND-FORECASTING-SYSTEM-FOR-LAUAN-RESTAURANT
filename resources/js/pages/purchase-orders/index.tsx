@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { PackageCheck, Search, ShoppingBag } from 'lucide-react';
+import { Download, PackageCheck, Search, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 
@@ -31,6 +31,15 @@ const peso = new Intl.NumberFormat('en-PH', {
     style: 'currency',
     currency: 'PHP',
 });
+
+const statusTone: Record<string, string> = {
+    pending: 'border-[#faa340]/60 bg-[#faa340]/10 text-[#040404]',
+    draft: 'border-[#040404]/20 bg-white text-[#040404]/70',
+    ordered: 'border-[#040404]/20 bg-white text-[#040404]',
+    partially_received: 'border-[#faa340]/40 bg-[#faa340]/10 text-[#040404]',
+    received: 'border-[#040404]/15 bg-[#040404]/5 text-[#040404]',
+    cancelled: 'border-[#040404]/10 bg-white text-[#040404]/45',
+};
 
 export default function PurchaseOrdersIndex({
     purchaseOrders,
@@ -136,66 +145,89 @@ export default function PurchaseOrdersIndex({
                     </button>
                 </form>
 
-                <section className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
-                    {purchaseOrders.data.map((order) => (
-                        <article
-                            key={order.id}
-                            className="rounded-md border border-[#040404]/10 bg-white p-4"
-                        >
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <p className="font-mono text-xs text-[#040404]/45">
-                                        {order.order_number}
-                                    </p>
-                                    <h2 className="mt-1 text-lg font-semibold text-[#040404]">
-                                        {order.supplier_name}
-                                    </h2>
-                                </div>
-                                <Badge
-                                    variant="outline"
-                                    className="border-[#faa340]/30 bg-[#faa340]/10 text-[#040404]"
-                                >
-                                    {order.status_label}
-                                </Badge>
-                            </div>
-                            <div className="mt-4 grid grid-cols-3 gap-2 text-sm">
-                                <span className="rounded border border-[#040404]/10 p-2">
-                                    <span className="block text-xs text-[#040404]/45">
-                                        Items
-                                    </span>
-                                    <strong>{order.items_count}</strong>
-                                </span>
-                                <span className="rounded border border-[#040404]/10 p-2">
-                                    <span className="block text-xs text-[#040404]/45">
-                                        Expected
-                                    </span>
-                                    <strong>{order.expected_at ?? 'TBD'}</strong>
-                                </span>
-                                <span className="rounded border border-[#040404]/10 p-2">
-                                    <span className="block text-xs text-[#040404]/45">
-                                        Total
-                                    </span>
-                                    <strong>
-                                        {peso.format(order.total_amount)}
-                                    </strong>
-                                </span>
-                            </div>
-                            {order.notes && (
-                                <p className="mt-3 line-clamp-2 text-sm text-[#040404]/55">
-                                    {order.notes}
-                                </p>
-                            )}
-                        </article>
-                    ))}
+                <section className="overflow-hidden rounded-md border border-[#040404]/10 bg-white">
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[980px] text-left text-sm">
+                            <thead className="bg-[#fbf8f5] text-xs text-[#040404]/60 uppercase">
+                                <tr className="border-b border-[#040404]/10">
+                                    <th className="px-3 py-2">PO No.</th>
+                                    <th className="px-3 py-2">Supplier</th>
+                                    <th className="px-3 py-2">Status</th>
+                                    <th className="px-3 py-2">Items</th>
+                                    <th className="px-3 py-2">Expected</th>
+                                    <th className="px-3 py-2">Total</th>
+                                    <th className="px-3 py-2">Notes</th>
+                                    <th className="px-3 py-2 text-right">
+                                        Receipt
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {purchaseOrders.data.map((order) => (
+                                    <tr
+                                        key={order.id}
+                                        className="border-b border-[#040404]/10 last:border-0"
+                                    >
+                                        <td className="px-3 py-2 font-mono text-xs text-[#040404]/70">
+                                            {order.order_number}
+                                        </td>
+                                        <td className="px-3 py-2 font-medium text-[#040404]">
+                                            {order.supplier_name}
+                                        </td>
+                                        <td className="px-3 py-2">
+                                            <Badge
+                                                variant="outline"
+                                                className={
+                                                    statusTone[order.status] ??
+                                                    statusTone.pending
+                                                }
+                                            >
+                                                {order.status_label}
+                                            </Badge>
+                                        </td>
+                                        <td className="px-3 py-2 text-[#040404]/70">
+                                            {order.items_count}
+                                        </td>
+                                        <td className="px-3 py-2 text-[#040404]/70">
+                                            {order.expected_at ?? 'TBD'}
+                                        </td>
+                                        <td className="px-3 py-2 font-semibold text-[#040404]">
+                                            {peso.format(order.total_amount)}
+                                        </td>
+                                        <td className="px-3 py-2">
+                                            <span className="block max-w-64 truncate text-[#040404]/55">
+                                                {order.notes ?? 'No notes'}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-2 text-right">
+                                            <a
+                                                href={`/admin/purchase-orders/${order.id}/receipt`}
+                                                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#faa340] px-3 text-xs font-semibold text-[#040404] transition hover:text-[#faa340]"
+                                            >
+                                                <Download className="size-3.5" />
+                                                Download
+                                            </a>
+                                        </td>
+                                    </tr>
+                                ))}
 
-                    {purchaseOrders.data.length === 0 && (
-                        <div className="col-span-full rounded-md border border-dashed border-[#040404]/15 bg-white p-12 text-center">
-                            <PackageCheck className="mx-auto size-8 text-[#faa340]" />
-                            <p className="mt-3 text-sm text-[#040404]/55">
-                                No purchase orders match the current filters.
-                            </p>
-                        </div>
-                    )}
+                                {purchaseOrders.data.length === 0 && (
+                                    <tr>
+                                        <td
+                                            colSpan={8}
+                                            className="px-4 py-14 text-center"
+                                        >
+                                            <PackageCheck className="mx-auto size-8 text-[#faa340]" />
+                                            <p className="mt-3 text-sm text-[#040404]/55">
+                                                No purchase orders match the
+                                                current filters.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </section>
 
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-2">

@@ -4,6 +4,7 @@ namespace App\Services\PurchaseOrder;
 
 use App\Enums\PurchaseOrderStatus;
 use App\Http\Resources\PurchaseOrderResource;
+use App\Models\PurchaseOrder;
 use App\Repositories\PurchaseOrder\PurchaseOrderRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -42,6 +43,32 @@ class PurchaseOrderService
     public function summary(): array
     {
         return $this->purchaseOrders->summary();
+    }
+
+    public function find(int $id): PurchaseOrder
+    {
+        return $this->purchaseOrders->find($id);
+    }
+
+    public function receiptText(PurchaseOrder $purchaseOrder): string
+    {
+        return implode(PHP_EOL, [
+            'LAUAN RESTAURANT',
+            'PURCHASE ORDER RECEIPT',
+            str_repeat('-', 32),
+            "PO Number: {$purchaseOrder->order_number}",
+            "Supplier: {$purchaseOrder->supplier_name}",
+            'Status: '.$purchaseOrder->status->label(),
+            'Items: '.$purchaseOrder->items_count,
+            'Total: PHP '.number_format((float) $purchaseOrder->total_amount, 2),
+            'Ordered: '.($purchaseOrder->ordered_at?->format('Y-m-d') ?? 'Pending'),
+            'Expected: '.($purchaseOrder->expected_at?->format('Y-m-d') ?? 'TBD'),
+            'Received: '.($purchaseOrder->received_at?->format('Y-m-d') ?? 'Not received'),
+            str_repeat('-', 32),
+            'Notes:',
+            $purchaseOrder->notes ?: 'No notes recorded.',
+            '',
+        ]);
     }
 
     /**

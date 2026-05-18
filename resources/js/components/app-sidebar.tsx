@@ -1,7 +1,6 @@
 import { Link } from '@inertiajs/react';
 import {
     BarChart3,
-    BookOpen,
     Boxes,
     ClipboardList,
     CookingPot,
@@ -49,8 +48,8 @@ const mainNavItems: NavItem[] = [
         icon: Utensils,
     },
     {
-        title: 'Sales',
-        href: dashboard(),
+        title: 'POS',
+        href: '/admin/pos',
         icon: ReceiptText,
     },
     {
@@ -65,7 +64,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Purchase Orders',
-        href: dashboard(),
+        href: '/admin/purchase-orders',
         icon: ShoppingBag,
     },
     {

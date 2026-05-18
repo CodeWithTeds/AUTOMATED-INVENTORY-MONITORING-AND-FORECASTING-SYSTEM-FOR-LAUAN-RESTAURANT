@@ -1,3 +1,13 @@
+import { useForm } from '@inertiajs/react';
+import {
+    Clock3,
+    ImageIcon,
+    LoaderCircle,
+    PackageCheck,
+    Utensils,
+} from 'lucide-react';
+import { useEffect, useMemo } from 'react';
+import type { ReactNode , FormEvent} from 'react';
 import InputError from '@/components/input-error';
 import {
     Dialog,
@@ -9,16 +19,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForm } from '@inertiajs/react';
-import {
-    Clock3,
-    ImageIcon,
-    LoaderCircle,
-    PackageCheck,
-    Utensils,
-} from 'lucide-react';
-import { FormEvent, useEffect, useMemo } from 'react';
-import type { ReactNode } from 'react';
 import type {
     MenuItemOption,
     ProductionBatch,
@@ -31,6 +31,7 @@ const blankForm = (
     statusOptions: ProductionOption[],
 ): ProductionFormData => ({
     batch_number: '',
+    category: 'all_menu',
     inventory_item_id: menuItemOptions[0]?.id
         ? String(menuItemOptions[0].id)
         : '',
@@ -47,6 +48,7 @@ const blankForm = (
 
 const batchToForm = (batch: ProductionBatch): ProductionFormData => ({
     batch_number: batch.batch_number,
+    category: batch.category,
     inventory_item_id: String(batch.inventory_item_id),
     planned_quantity: String(batch.planned_quantity),
     completed_quantity: String(batch.completed_quantity),
@@ -101,12 +103,14 @@ export function ProductionBatchModal({
     onOpenChange,
     batch,
     menuItemOptions,
+    categoryOptions,
     statusOptions,
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     batch: ProductionBatch | null;
     menuItemOptions: MenuItemOption[];
+    categoryOptions: ProductionOption[];
     statusOptions: ProductionOption[];
 }) {
     const isEditing = batch !== null;
@@ -156,6 +160,7 @@ export function ProductionBatchModal({
                 _method: 'put',
             }));
             post(`/admin/production/${batch.id}`, options);
+
             return;
         }
 
@@ -318,7 +323,7 @@ export function ProductionBatchModal({
                                         <Field
                                             label="Menu item"
                                             error={errors.inventory_item_id}
-                                            className="md:col-span-4"
+                                            className="md:col-span-3"
                                         >
                                             <select
                                                 value={data.inventory_item_id}
@@ -341,6 +346,33 @@ export function ProductionBatchModal({
                                                         {item.name} ({item.sku})
                                                     </option>
                                                 ))}
+                                            </select>
+                                        </Field>
+                                        <Field
+                                            label="Category"
+                                            error={errors.category}
+                                            className="md:col-span-1"
+                                        >
+                                            <select
+                                                value={data.category}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'category',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                className="h-9 w-full rounded-md border border-[#040404]/15 px-3 text-sm text-[#040404] shadow-xs outline-none focus:border-[#faa340] focus:ring-3 focus:ring-[#faa340]/30"
+                                            >
+                                                {categoryOptions.map(
+                                                    (option) => (
+                                                        <option
+                                                            key={option.value}
+                                                            value={option.value}
+                                                        >
+                                                            {option.label}
+                                                        </option>
+                                                    ),
+                                                )}
                                             </select>
                                         </Field>
                                         <Field

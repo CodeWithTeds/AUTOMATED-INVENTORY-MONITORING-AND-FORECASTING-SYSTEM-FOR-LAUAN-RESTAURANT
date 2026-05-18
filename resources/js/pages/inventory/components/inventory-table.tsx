@@ -1,6 +1,6 @@
-import { Badge } from '@/components/ui/badge';
 import { Link, router } from '@inertiajs/react';
 import { ArrowDown, ArrowUp, ImageIcon, Pencil, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import type {
     InventoryFilters,
     InventoryItem,
@@ -133,7 +133,7 @@ export function InventoryTable({
             </div>
 
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[1260px] text-left text-xs">
+                <table className="w-full min-w-[1420px] text-left text-xs">
                     <thead className="text-xs text-[#040404]/65 uppercase">
                         <tr className="border-b border-[#040404]/10">
                             <th className="w-10 px-2 py-1.5">Img</th>
@@ -167,6 +167,10 @@ export function InventoryTable({
                                     filters={filters}
                                 />
                             </th>
+                            <th className="px-2 py-1.5">Start</th>
+                            <th className="px-2 py-1.5">In</th>
+                            <th className="px-2 py-1.5">Out</th>
+                            <th className="px-2 py-1.5">End</th>
                             <th className="px-2 py-1.5">Par</th>
                             <th className="px-2 py-1.5">Reorder</th>
                             <th className="px-2 py-1.5">Forecast</th>
@@ -234,6 +238,18 @@ export function InventoryTable({
                                     </Badge>
                                 </td>
                                 <td className="px-2 py-1 text-[#040404]/70">
+                                    {item.starting_stock}
+                                </td>
+                                <td className="px-2 py-1 text-[#040404]/70">
+                                    {item.stock_in}
+                                </td>
+                                <td className="px-2 py-1 text-[#040404]/70">
+                                    {item.stock_out}
+                                </td>
+                                <td className="px-2 py-1 text-[#040404]/70">
+                                    {item.ending_stock}
+                                </td>
+                                <td className="px-2 py-1 text-[#040404]/70">
                                     {item.par_level}
                                 </td>
                                 <td className="px-2 py-1 text-[#040404]/70">
@@ -292,7 +308,7 @@ export function InventoryTable({
                         {items.data.length === 0 && (
                             <tr>
                                 <td
-                                    colSpan={15}
+                                    colSpan={19}
                                     className="px-4 py-14 text-center text-[#040404]/60"
                                 >
                                     No products match the current filters.

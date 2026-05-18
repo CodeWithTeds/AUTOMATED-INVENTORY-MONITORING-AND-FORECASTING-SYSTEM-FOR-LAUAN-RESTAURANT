@@ -1,7 +1,8 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { CookingPot, Plus } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useState  } from 'react';
+import type {ReactNode} from 'react';
+import AppLayout from '@/layouts/app-layout';
 import { ProductionBatchModal } from './components/production-batch-modal';
 import { ProductionFilters } from './components/production-filters';
 import { ProductionTable } from './components/production-table';
@@ -19,6 +20,7 @@ type Props = {
     filters: ProductionFiltersType;
     summary: ProductionSummary;
     menuItemOptions: MenuItemOption[];
+    categoryOptions: ProductionOption[];
     statusOptions: ProductionOption[];
 };
 
@@ -34,6 +36,7 @@ export default function ProductionIndex({
     filters,
     summary,
     menuItemOptions,
+    categoryOptions,
     statusOptions,
 }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
@@ -79,6 +82,7 @@ export default function ProductionIndex({
                 <div className="space-y-2">
                     <ProductionFilters
                         filters={filters}
+                        categoryOptions={categoryOptions}
                         statusOptions={statusOptions}
                     />
                     <ProductionTable
@@ -95,6 +99,7 @@ export default function ProductionIndex({
                 onOpenChange={setModalOpen}
                 batch={selectedBatch}
                 menuItemOptions={menuItemOptions}
+                categoryOptions={categoryOptions}
                 statusOptions={statusOptions}
             />
         </>

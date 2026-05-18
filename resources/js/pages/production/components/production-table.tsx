@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge';
 import { Link, router } from '@inertiajs/react';
 import {
     ArrowDown,
@@ -9,6 +8,7 @@ import {
     Pencil,
     Trash2,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import type {
     PaginatedProductionBatches,
     ProductionBatch,
@@ -144,6 +144,13 @@ export function ProductionTable({
                             <th className="px-2 py-1.5">Menu item</th>
                             <th className="px-2 py-1.5">
                                 <SortButton
+                                    field="category"
+                                    label="Category"
+                                    filters={filters}
+                                />
+                            </th>
+                            <th className="px-2 py-1.5">
+                                <SortButton
                                     field="planned_quantity"
                                     label="Planned"
                                     filters={filters}
@@ -157,6 +164,7 @@ export function ProductionTable({
                                 />
                             </th>
                             <th className="px-2 py-1.5">Waste</th>
+                            <th className="px-2 py-1.5">Portion</th>
                             <th className="px-2 py-1.5">Raw materials</th>
                             <th className="px-2 py-1.5">Synced</th>
                             <th className="px-2 py-1.5">Area</th>
@@ -226,6 +234,15 @@ export function ProductionTable({
                                         </p>
                                     )}
                                 </td>
+                                <td className="px-2 py-1">
+                                    <Badge
+                                        variant="outline"
+                                        className="gap-1 border-[#040404]/15 px-1.5 py-0 text-[11px] text-[#040404]"
+                                    >
+                                        <span>{batch.category_icon}</span>
+                                        {batch.category_label}
+                                    </Badge>
+                                </td>
                                 <td className="px-2 py-1 text-[#040404]/75">
                                     {quantity(
                                         batch.planned_quantity,
@@ -243,6 +260,11 @@ export function ProductionTable({
                                         batch.waste_quantity,
                                         batch.product_unit,
                                     )}
+                                </td>
+                                <td className="px-2 py-1 text-[#040404]/70">
+                                    {batch.portion_size > 0
+                                        ? `${batch.portion_size} ${batch.portion_unit ?? 'g'}`
+                                        : 'Not set'}
                                 </td>
                                 <td className="px-2 py-1 text-[#040404]/70">
                                     <div className="max-w-52 space-y-0.5">
@@ -332,7 +354,7 @@ export function ProductionTable({
                         {batches.data.length === 0 && (
                             <tr>
                                 <td
-                                    colSpan={14}
+                                    colSpan={16}
                                     className="px-4 py-14 text-center text-[#040404]/60"
                                 >
                                     No production batches match the current

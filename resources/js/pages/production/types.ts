@@ -1,6 +1,7 @@
 export type ProductionOption = {
     value: string;
     label: string;
+    icon?: string;
 };
 
 export type MenuItemOption = {
@@ -27,6 +28,9 @@ export type ProductionBatch = {
     id: number;
     inventory_item_id: number;
     batch_number: string;
+    category: string;
+    category_label: string;
+    category_icon: string;
     product_name: string | null;
     product_sku: string | null;
     product_unit: string | null;
@@ -37,6 +41,8 @@ export type ProductionBatch = {
     planned_quantity: number;
     completed_quantity: number;
     waste_quantity: number;
+    portion_size: number;
+    portion_unit: string | null;
     stock_synced_quantity: number;
     materials: ProductionMaterial[];
     production_area: string | null;
@@ -65,6 +71,7 @@ export type ProductionMaterial = {
 
 export type ProductionFilters = {
     search?: string;
+    category?: string;
     status?: string;
     production_area?: string;
     sort?: string;
@@ -99,6 +106,7 @@ export type ProductionSummary = {
 
 export type ProductionFormData = {
     batch_number: string;
+    category: string;
     inventory_item_id: string;
     planned_quantity: string;
     completed_quantity: string;

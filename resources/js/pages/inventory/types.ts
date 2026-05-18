@@ -17,6 +17,10 @@ export type InventoryItem = {
     supplier: string | null;
     unit: string;
     current_stock: number;
+    starting_stock: number;
+    stock_in: number;
+    stock_out: number;
+    ending_stock: number;
     par_level: number;
     reorder_point: number;
     reorder_quantity: number;

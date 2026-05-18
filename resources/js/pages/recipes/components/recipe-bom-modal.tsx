@@ -1,3 +1,7 @@
+import { useForm } from '@inertiajs/react';
+import { ImagePlus, LoaderCircle, ReceiptText } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode , FormEvent} from 'react';
 import InputError from '@/components/input-error';
 import {
     Dialog,
@@ -9,10 +13,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForm } from '@inertiajs/react';
-import { ImagePlus, LoaderCircle, ReceiptText } from 'lucide-react';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
 import type {
     RawMaterialOption,
     RecipeBom,
@@ -131,6 +131,7 @@ export function RecipeBomModal({
 
         if (!file) {
             setPreview(recipe?.image_url ?? null);
+
             return;
         }
 
@@ -183,6 +184,7 @@ export function RecipeBomModal({
                 materials: selectedMaterials,
             }));
             post(`/admin/recipes/${recipe.id}`, options);
+
             return;
         }
 

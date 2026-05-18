@@ -1,7 +1,8 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Plus, ReceiptText } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useState  } from 'react';
+import type {ReactNode} from 'react';
+import AppLayout from '@/layouts/app-layout';
 import { RecipeBomFilters } from './components/recipe-bom-filters';
 import { RecipeBomGrid } from './components/recipe-bom-grid';
 import { RecipeBomModal } from './components/recipe-bom-modal';

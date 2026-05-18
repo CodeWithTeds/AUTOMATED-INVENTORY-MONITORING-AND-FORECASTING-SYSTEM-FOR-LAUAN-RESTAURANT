@@ -1,3 +1,7 @@
+import { useForm } from '@inertiajs/react';
+import { LoaderCircle, Truck } from 'lucide-react';
+import type { FormEvent, ReactNode} from 'react';
+import { useEffect, useMemo } from 'react';
 import InputError from '@/components/input-error';
 import {
     Dialog,
@@ -9,9 +13,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForm } from '@inertiajs/react';
-import { LoaderCircle, Truck } from 'lucide-react';
-import { FormEvent, ReactNode, useEffect, useMemo } from 'react';
 import type { Supplier, SupplierFormData, SupplierOption } from '../types';
 
 const blankForm = (
@@ -122,6 +123,7 @@ export function SupplierModal({
         if (isEditing) {
             transform((current) => ({ ...current, _method: 'put' }));
             post(`/admin/suppliers/${supplier.id}`, options);
+
             return;
         }
 

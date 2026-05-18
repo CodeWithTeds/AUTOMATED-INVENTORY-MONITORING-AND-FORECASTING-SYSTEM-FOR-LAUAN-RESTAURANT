@@ -35,6 +35,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->singleton(PurchaseOrderRepositoryInterface::class, PurchaseOrderRepository::class);
         $this->app->singleton(RecipeBomRepositoryInterface::class, RecipeBomRepository::class);
         $this->app->singleton(SupplierRepositoryInterface::class, SupplierRepository::class);
+        $this->app->singleton(\App\Repositories\Sales\SalesRepositoryInterface::class, \App\Repositories\Sales\SalesRepository::class);
     }
 
     /**

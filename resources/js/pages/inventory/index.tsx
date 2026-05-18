@@ -1,7 +1,8 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Plus, Warehouse } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useState  } from 'react';
+import type {ReactNode} from 'react';
+import AppLayout from '@/layouts/app-layout';
 import { InventoryFilters } from './components/inventory-filters';
 import { InventoryItemModal } from './components/inventory-item-modal';
 import { InventoryTable } from './components/inventory-table';

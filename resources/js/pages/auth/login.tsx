@@ -1,7 +1,8 @@
-import InputError from '@/components/input-error';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Eye, EyeOff, LockKeyhole, Mail, UserRoundCog } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import type { FormEvent} from 'react';
+import { useState } from 'react';
+import InputError from '@/components/input-error';
 import { dashboard, home } from '@/routes';
 import { request } from '@/routes/password';
 

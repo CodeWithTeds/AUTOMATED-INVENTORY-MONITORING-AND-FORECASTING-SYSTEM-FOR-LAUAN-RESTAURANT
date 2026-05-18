@@ -1,3 +1,7 @@
+import { useForm } from '@inertiajs/react';
+import { ImagePlus, LoaderCircle, Package } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode , FormEvent} from 'react';
 import InputError from '@/components/input-error';
 import {
     Dialog,
@@ -9,10 +13,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForm } from '@inertiajs/react';
-import { ImagePlus, LoaderCircle, Package } from 'lucide-react';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
 import type {
     InventoryFormData,
     InventoryItem,
@@ -131,6 +131,7 @@ export function InventoryItemModal({
 
         if (!file) {
             setPreview(item?.image_url ?? null);
+
             return;
         }
 
@@ -152,6 +153,7 @@ export function InventoryItemModal({
         if (isEditing) {
             transform((current) => ({ ...current, _method: 'put' }));
             post(`/admin/inventory/${item.id}`, options);
+
             return;
         }
 

@@ -47,6 +47,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         ->name('suppliers.report');
     Route::resource('suppliers', SupplierController::class)
         ->only(['index', 'store', 'update', 'destroy']);
+    Route::get('sales', [\App\Http\Controllers\Sales\SalesController::class, 'index'])
+        ->name('sales.index');
 });
 
 require __DIR__.'/settings.php';

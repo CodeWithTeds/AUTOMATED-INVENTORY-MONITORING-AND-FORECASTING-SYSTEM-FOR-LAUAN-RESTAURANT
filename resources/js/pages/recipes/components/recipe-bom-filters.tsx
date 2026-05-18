@@ -1,7 +1,8 @@
-import { Input } from '@/components/ui/input';
 import { router } from '@inertiajs/react';
 import { Search } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import type { FormEvent} from 'react';
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
 import type { RecipeFilters as RecipeFiltersType } from '../types';
 
 export function RecipeBomFilters({ filters }: { filters: RecipeFiltersType }) {

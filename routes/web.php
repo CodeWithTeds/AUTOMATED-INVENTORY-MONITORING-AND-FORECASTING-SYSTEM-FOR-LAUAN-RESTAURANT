@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Forecasting\ForecastingController;
 use App\Http\Controllers\Inventory\InventoryItemController;
 use App\Http\Controllers\Pos\PosController;
@@ -26,7 +27,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::redirect('/', '/admin/dashboard')->name('admin');
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('inventory', InventoryItemController::class)
         ->only(['index', 'store', 'update', 'destroy']);
     Route::resource('production', ProductionBatchController::class)

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\Forecasting\ForecastingRepository;
+use App\Repositories\Forecasting\ForecastingRepositoryInterface;
 use App\Repositories\Inventory\InventoryItemRepository;
 use App\Repositories\Inventory\InventoryItemRepositoryInterface;
 use App\Repositories\Pos\PosOrderRepository;
@@ -33,6 +35,7 @@ class RepositoryServiceProvider extends ServiceProvider
     {
         $this->app->singleton(TaskRepositoryInterface::class, TaskRepository::class);
         $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->singleton(ForecastingRepositoryInterface::class, ForecastingRepository::class);
         $this->app->singleton(InventoryItemRepositoryInterface::class, InventoryItemRepository::class);
         $this->app->singleton(PosOrderRepositoryInterface::class, PosOrderRepository::class);
         $this->app->singleton(ProductionBatchRepositoryInterface::class, ProductionBatchRepository::class);

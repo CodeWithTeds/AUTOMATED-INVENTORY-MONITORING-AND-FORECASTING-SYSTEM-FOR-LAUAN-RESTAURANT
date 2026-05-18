@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Forecasting\ForecastingController;
 use App\Http\Controllers\Inventory\InventoryItemController;
 use App\Http\Controllers\Pos\PosController;
 use App\Http\Controllers\Production\ProductionBatchController;
@@ -51,6 +52,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         ->only(['index', 'store', 'update', 'destroy']);
     Route::get('sales', [SalesController::class, 'index'])
         ->name('sales.index');
+    Route::get('forcasting', [ForecastingController::class, 'index'])
+        ->name('forecasting.index');
     Route::get('report', [ReportController::class, 'index'])
         ->name('report.index');
 });

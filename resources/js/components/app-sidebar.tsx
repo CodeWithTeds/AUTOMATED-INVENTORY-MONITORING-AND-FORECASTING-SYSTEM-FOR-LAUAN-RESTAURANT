@@ -60,7 +60,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Forecasting',
-        href: dashboard(),
+        href: '/admin/forcasting',
         icon: BarChart3,
     },
     {

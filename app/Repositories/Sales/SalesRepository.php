@@ -41,7 +41,8 @@ class SalesRepository implements SalesRepositoryInterface
             $this->buildQuery($filters)
                 ->select([
                     DB::raw('DATE(paid_at) as date'),
-                    DB::raw('SUM(total_amount) as total')
+                    DB::raw('SUM(total_amount) as total'),
+                    DB::raw('COUNT(*) as count')
                 ])
                 ->groupBy('date')
                 ->orderBy('date', 'asc')

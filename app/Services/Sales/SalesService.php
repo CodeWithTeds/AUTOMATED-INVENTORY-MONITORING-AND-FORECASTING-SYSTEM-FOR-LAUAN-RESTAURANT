@@ -60,6 +60,7 @@ class SalesService
             $filledData->push([
                 'date' => $dateString,
                 'total' => $keyedData->has($dateString) ? (float) $keyedData->get($dateString)['total'] : 0,
+                'count' => $keyedData->has($dateString) ? (int) $keyedData->get($dateString)['count'] : 0,
             ]);
         }
 

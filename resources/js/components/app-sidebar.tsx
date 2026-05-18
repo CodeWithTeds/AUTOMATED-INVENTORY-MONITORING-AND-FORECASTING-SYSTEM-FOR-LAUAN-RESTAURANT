@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import {
     BarChart3,
-    Banknote,
+    TrendingUp,
     Boxes,
     ClipboardList,
     CookingPot,
@@ -56,7 +56,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Sales',
         href: '/admin/sales',
-        icon: Banknote,
+        icon: TrendingUp,
     },
     {
         title: 'Forecasting',

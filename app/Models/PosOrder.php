@@ -4,30 +4,30 @@ namespace App\Models;
 
 use App\Enums\PosOrderStatus;
 use App\Enums\PosPaymentMethod;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable([
-    'user_id',
-    'order_number',
-    'customer_name',
-    'status',
-    'payment_method',
-    'subtotal_amount',
-    'discount_amount',
-    'tax_amount',
-    'total_amount',
-    'amount_paid',
-    'change_amount',
-    'paid_at',
-    'notes',
-])]
 class PosOrder extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'order_number',
+        'customer_name',
+        'status',
+        'payment_method',
+        'subtotal_amount',
+        'discount_amount',
+        'tax_amount',
+        'total_amount',
+        'amount_paid',
+        'change_amount',
+        'paid_at',
+        'notes',
+    ];
 
     protected $casts = [
         'status' => PosOrderStatus::class,

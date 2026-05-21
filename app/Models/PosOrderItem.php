@@ -2,24 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable([
-    'pos_order_id',
-    'inventory_item_id',
-    'item_sku',
-    'item_name',
-    'quantity',
-    'unit',
-    'unit_price',
-    'line_total',
-])]
 class PosOrderItem extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'pos_order_id',
+        'inventory_item_id',
+        'item_sku',
+        'item_name',
+        'quantity',
+        'unit',
+        'unit_price',
+        'line_total',
+    ];
 
     protected $casts = [
         'quantity' => 'decimal:2',

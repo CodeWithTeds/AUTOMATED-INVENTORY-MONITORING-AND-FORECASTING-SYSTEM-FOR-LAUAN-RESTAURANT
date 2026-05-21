@@ -2,22 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable([
-    'production_batch_id',
-    'inventory_item_id',
-    'quantity',
-    'unit',
-    'stock_synced_quantity',
-    'notes',
-])]
 class ProductionBatchMaterial extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'production_batch_id',
+        'inventory_item_id',
+        'quantity',
+        'unit',
+        'stock_synced_quantity',
+        'notes',
+    ];
 
     protected $casts = [
         'quantity' => 'decimal:2',

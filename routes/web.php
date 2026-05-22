@@ -10,6 +10,7 @@ use App\Http\Controllers\PurchaseOrder\PurchaseOrderController;
 use App\Http\Controllers\Recipe\RecipeBomController;
 use App\Http\Controllers\Report\ReportController;
 use App\Http\Controllers\Sales\SalesController;
+use App\Http\Controllers\Staff\StaffController;
 use App\Http\Controllers\Supplier\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -57,6 +58,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         ->name('forecasting.index');
     Route::get('report', [ReportController::class, 'index'])
         ->name('report.index');
+    Route::resource('staff', StaffController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
 });
 
 require __DIR__.'/settings.php';

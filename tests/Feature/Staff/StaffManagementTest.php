@@ -63,7 +63,15 @@ test('admins can create login-ready staff accounts', function (): void {
         'email' => 'juan.staff@aimfs.test',
         'password' => 'staff-password',
         'remember' => false,
-    ])->assertRedirect('/admin/dashboard');
+    ])->assertRedirect('/staff/dashboard');
+});
+
+test('staff users are redirected away from the admin dashboard url', function (): void {
+    $staff = staffUser();
+
+    $this->actingAs($staff)
+        ->get('/admin/dashboard')
+        ->assertRedirect(route('staff.dashboard'));
 });
 
 test('admins can update and delete staff accounts', function (): void {

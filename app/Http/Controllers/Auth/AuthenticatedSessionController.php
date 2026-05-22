@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Repositories\UserRepositoryInterface;
@@ -18,7 +19,7 @@ class AuthenticatedSessionController extends Controller
     public function create(Request $request): Response|RedirectResponse
     {
         return $request->user()
-            ? redirect()->route('dashboard')
+            ? redirect()->to($this->homePathFor($request->user()->role))
             : Inertia::render('auth/login', [
                 'canResetPassword' => Features::enabled(Features::resetPasswords()),
                 'canRegister' => Features::enabled(Features::registration()),
@@ -37,7 +38,7 @@ class AuthenticatedSessionController extends Controller
         Auth::guard('web')->login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended($this->homePathFor($user->role));
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -47,5 +48,12 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('home');
+    }
+
+    private function homePathFor(UserRole|string|null $role): string
+    {
+        return $role === UserRole::Staff || $role === UserRole::Staff->value
+            ? route('staff.dashboard', absolute: false)
+            : route('dashboard', absolute: false);
     }
 }

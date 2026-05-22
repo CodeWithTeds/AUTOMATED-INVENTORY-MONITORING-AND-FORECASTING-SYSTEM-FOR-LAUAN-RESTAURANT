@@ -62,4 +62,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         ->only(['index', 'store', 'update', 'destroy']);
 });
 
+Route::middleware(['auth', 'verified'])->prefix('staff')->name('staff.')->group(function () {
+    Route::redirect('/', '/staff/dashboard')->name('home');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+});
+
 require __DIR__.'/settings.php';

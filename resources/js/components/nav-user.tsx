@@ -14,11 +14,13 @@ import {
 import { UserInfo } from '@/components/user-info';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useIsMobile } from '@/hooks/use-mobile';
+import type { Auth } from '@/types';
 
 export function NavUser() {
-    const { auth } = usePage().props;
+    const { auth } = usePage().props as unknown as { auth: Auth };
     const { state } = useSidebar();
     const isMobile = useIsMobile();
+    const isStaff = auth.user?.role === 'staff';
 
     if (!auth.user) {
         return null;
@@ -31,7 +33,11 @@ export function NavUser() {
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
                             size="lg"
-                            className="group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent"
+                            className={
+                                isStaff
+                                    ? 'group rounded-lg text-white/82 hover:bg-white/10 hover:text-white data-[state=open]:bg-white/10 data-[state=open]:text-white'
+                                    : 'group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent'
+                            }
                             data-test="sidebar-menu-button"
                         >
                             <UserInfo user={auth.user} />

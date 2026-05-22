@@ -227,9 +227,12 @@ export default function Dashboard({
     dateRangeLabel,
 }: Props) {
     const { auth } = usePage().props as {
-        auth: { user?: { name?: string } | null };
+        auth: { user?: { name?: string; role?: string } | null };
     };
-    const firstName = auth.user?.name?.split(' ')[0] ?? 'Admin';
+    const firstName =
+        auth.user?.role === 'staff'
+            ? 'Staff'
+            : (auth.user?.name?.split(' ')[0] ?? 'Admin');
     const money = new Intl.NumberFormat('en-PH', {
         style: 'currency',
         currency: 'PHP',

@@ -9,7 +9,7 @@ test('guests are redirected to the login page', function () {
 });
 
 test('authenticated users can visit the dashboard', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
     $this->actingAs($user);
 
     $response = $this->get(route('dashboard'));
@@ -23,4 +23,18 @@ test('authenticated users can visit the dashboard', function () {
             ->has('productionStatusMix')
             ->has('forecastAlerts')
             ->has('quickOverviewMix'));
+});
+
+test('staff users have their own dashboard', function () {
+    $user = User::factory()->staff()->create();
+
+    $this->actingAs($user)
+        ->get(route('staff.dashboard'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('staff/dashboard')
+            ->has('summary')
+            ->has('statCards', 4)
+            ->has('forecastAlerts')
+            ->has('welcomeMessage'));
 });

@@ -36,7 +36,7 @@ class UpdateRecipeBomRequest extends FormRequest
             'materials.*.raw_material_id' => [
                 'required',
                 'integer',
-                Rule::exists('inventory_items', 'id')->where('is_menu_item', false),
+                Rule::exists('inventory_items', 'id')->where('is_menu_item', 0),
             ],
             'materials.*.quantity' => ['required', 'numeric', 'min:0.01', 'max:99999999.99'],
             'materials.*.unit' => ['required', 'string', 'max:24'],

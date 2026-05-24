@@ -62,7 +62,8 @@ test('users can create a menu item with raw-material BOM', function (): void {
                 ],
             ],
         ])
-        ->assertRedirect();
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
 
     $menuItem = InventoryItem::query()->where('sku', 'MENU-CRM-001')->firstOrFail();
 

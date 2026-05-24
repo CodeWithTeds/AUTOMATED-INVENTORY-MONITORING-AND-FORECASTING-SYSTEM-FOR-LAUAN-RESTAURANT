@@ -25,7 +25,7 @@ class StoreProductionBatchRequest extends FormRequest
             'inventory_item_id' => [
                 'required',
                 'integer',
-                Rule::exists('inventory_items', 'id')->where('is_menu_item', true),
+                Rule::exists('inventory_items', 'id')->where('is_menu_item', 1),
             ],
             'planned_quantity' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'completed_quantity' => ['required', 'numeric', 'min:0', 'max:99999999.99'],

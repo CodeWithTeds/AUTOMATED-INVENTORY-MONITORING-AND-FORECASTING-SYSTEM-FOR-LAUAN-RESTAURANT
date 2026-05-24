@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -40,6 +41,14 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+            ],
+            'permissions' => [
+                'canViewAdminOnlyPages' => fn (): bool => $request->user() !== null
+                    && Gate::forUser($request->user())->allows('view-admin-only-page'),
+                'canEditOperationalRecords' => fn (): bool => $request->user() !== null
+                    && Gate::forUser($request->user())->allows('update-operational-record'),
+                'canDeleteOperationalRecords' => fn (): bool => $request->user() !== null
+                    && Gate::forUser($request->user())->allows('delete-operational-record'),
             ],
             'flash' => [
                 'success' => fn (): mixed => $request->session()->get('success'),

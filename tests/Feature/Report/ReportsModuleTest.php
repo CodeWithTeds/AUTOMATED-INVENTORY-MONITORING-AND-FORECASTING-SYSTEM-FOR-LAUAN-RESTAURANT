@@ -21,7 +21,7 @@ test('guests are redirected from the reports module', function (): void {
 });
 
 test('authenticated users can view reports with aggregate data', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
     $item = InventoryItem::query()->create([
         'sku' => 'REP-RAW-001',
         'name' => 'Report Rice',

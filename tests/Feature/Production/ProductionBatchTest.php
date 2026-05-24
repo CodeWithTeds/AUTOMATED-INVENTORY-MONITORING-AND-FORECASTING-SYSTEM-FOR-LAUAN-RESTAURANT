@@ -47,7 +47,7 @@ function productionMenuItem(array $attributes = []): InventoryItem
 }
 
 test('authenticated users can view production batches', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
 
     $this->withoutVite();
 
@@ -204,7 +204,7 @@ test('production batches accept enum-backed categories', function (): void {
 });
 
 test('updating and deleting a completed batch keeps product and raw stock in sync', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
     $menuItem = productionMenuItem(['current_stock' => 10]);
     $rawMaterial = productionInventoryItem([
         'sku' => 'RAW-RICE-001',

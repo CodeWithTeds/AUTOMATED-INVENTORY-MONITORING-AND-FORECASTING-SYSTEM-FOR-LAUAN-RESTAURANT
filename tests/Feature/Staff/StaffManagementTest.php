@@ -130,3 +130,12 @@ test('staff users cannot manage staff accounts', function (): void {
         ])
         ->assertForbidden();
 });
+
+test('staff users cannot open admin-only pages', function (): void {
+    $staff = staffUser();
+
+    $this->actingAs($staff)->get('/admin/sales')->assertForbidden();
+    $this->actingAs($staff)->get('/admin/forcasting')->assertForbidden();
+    $this->actingAs($staff)->get('/admin/suppliers')->assertForbidden();
+    $this->actingAs($staff)->get('/admin/report')->assertForbidden();
+});

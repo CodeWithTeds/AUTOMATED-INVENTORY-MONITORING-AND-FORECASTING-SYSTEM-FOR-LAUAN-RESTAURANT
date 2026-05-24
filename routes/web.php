@@ -29,10 +29,16 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::redirect('/', '/admin/dashboard')->name('admin');
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
     Route::resource('inventory', InventoryItemController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->middlewareFor('update', 'can:update-operational-record')
+        ->middlewareFor('destroy', 'can:delete-operational-record');
     Route::resource('production', ProductionBatchController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->middlewareFor('update', 'can:update-operational-record')
+        ->middlewareFor('destroy', 'can:delete-operational-record');
+
     Route::get('pos', [PosController::class, 'index'])->name('pos.index');
     Route::get('pos/products', [PosController::class, 'products'])
         ->middleware('throttle:120,1')
@@ -43,23 +49,30 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::get('purchase-orders', [PurchaseOrderController::class, 'index'])
         ->name('purchase-orders.index');
     Route::patch('purchase-orders/{purchase_order}/status', [PurchaseOrderController::class, 'updateStatus'])
+        ->middleware('can:update-operational-record')
         ->name('purchase-orders.status');
     Route::get('purchase-orders/{purchase_order}/receipt', [PurchaseOrderController::class, 'receipt'])
         ->name('purchase-orders.receipt');
+
     Route::resource('recipes', RecipeBomController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
-    Route::get('suppliers/report', [SupplierController::class, 'report'])
-        ->name('suppliers.report');
-    Route::resource('suppliers', SupplierController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
-    Route::get('sales', [SalesController::class, 'index'])
-        ->name('sales.index');
-    Route::get('forcasting', [ForecastingController::class, 'index'])
-        ->name('forecasting.index');
-    Route::get('report', [ReportController::class, 'index'])
-        ->name('report.index');
-    Route::resource('staff', StaffController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->middlewareFor('update', 'can:update-operational-record')
+        ->middlewareFor('destroy', 'can:delete-operational-record');
+
+    Route::middleware('can:view-admin-only-page')->group(function () {
+        Route::get('suppliers/report', [SupplierController::class, 'report'])
+            ->name('suppliers.report');
+        Route::resource('suppliers', SupplierController::class)
+            ->only(['index', 'store', 'update', 'destroy']);
+        Route::get('sales', [SalesController::class, 'index'])
+            ->name('sales.index');
+        Route::get('forcasting', [ForecastingController::class, 'index'])
+            ->name('forecasting.index');
+        Route::get('report', [ReportController::class, 'index'])
+            ->name('report.index');
+        Route::resource('staff', StaffController::class)
+            ->only(['index', 'store', 'update', 'destroy']);
+    });
 });
 
 Route::middleware(['auth', 'verified'])->prefix('staff')->name('staff.')->group(function () {

@@ -15,7 +15,7 @@ test('guests are redirected from the forecasting module', function (): void {
 });
 
 test('authenticated users can view POS-driven inventory forecasts', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
     $menuItem = InventoryItem::query()->create([
         'sku' => 'FCST-MENU-001',
         'name' => 'Forecast Burger',

@@ -6,7 +6,7 @@ use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
 test('authenticated users can view purchase orders', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
 
     $this->withoutVite();
 
@@ -55,7 +55,7 @@ test('authenticated users can download a purchase order receipt', function (): v
 });
 
 test('authenticated users can update purchase order status', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
 
     $purchaseOrder = PurchaseOrder::query()->create([
         'order_number' => 'PO-2026-003',
@@ -80,4 +80,24 @@ test('authenticated users can update purchase order status', function (): void {
     ]);
 
     expect($purchaseOrder->refresh()->received_at)->not->toBeNull();
+});
+
+test('staff users cannot update purchase order status', function (): void {
+    $user = User::factory()->staff()->create();
+
+    $purchaseOrder = PurchaseOrder::query()->create([
+        'order_number' => 'PO-2026-004',
+        'supplier_name' => 'Blocked Status Supplier',
+        'status' => PurchaseOrderStatus::Pending,
+        'items_count' => 1,
+        'total_amount' => 500,
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
+        ->patch("/admin/purchase-orders/{$purchaseOrder->id}/status", [
+            '_token' => 'test-token',
+            'status' => PurchaseOrderStatus::Received->value,
+        ])
+        ->assertForbidden();
 });

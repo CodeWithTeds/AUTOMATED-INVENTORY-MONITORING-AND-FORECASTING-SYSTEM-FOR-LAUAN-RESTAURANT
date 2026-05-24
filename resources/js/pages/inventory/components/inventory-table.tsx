@@ -73,11 +73,15 @@ export function InventoryTable({
     filters,
     summary,
     onEdit,
+    canEdit,
+    canDelete,
 }: {
     items: PaginatedInventoryItems;
     filters: InventoryFilters;
     summary: InventorySummary;
     onEdit: (item: InventoryItem) => void;
+    canEdit: boolean;
+    canDelete: boolean;
 }) {
     const deleteItem = (item: InventoryItem) => {
         if (!confirm(`Delete ${item.name} from inventory?`)) {
@@ -284,22 +288,33 @@ export function InventoryTable({
                                 </td>
                                 <td className="px-2 py-1 text-right">
                                     <div className="flex justify-end gap-1">
-                                        <button
-                                            type="button"
-                                            className="inline-grid size-7 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
-                                            onClick={() => onEdit(item)}
-                                            aria-label={`Edit ${item.name}`}
-                                        >
-                                            <Pencil className="size-3.5" />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="inline-grid size-7 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
-                                            onClick={() => deleteItem(item)}
-                                            aria-label={`Delete ${item.name}`}
-                                        >
-                                            <Trash2 className="size-3.5 text-[#040404]" />
-                                        </button>
+                                        {canEdit && (
+                                            <button
+                                                type="button"
+                                                className="inline-grid size-7 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
+                                                onClick={() => onEdit(item)}
+                                                aria-label={`Edit ${item.name}`}
+                                            >
+                                                <Pencil className="size-3.5" />
+                                            </button>
+                                        )}
+                                        {canDelete && (
+                                            <button
+                                                type="button"
+                                                className="inline-grid size-7 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
+                                                onClick={() =>
+                                                    deleteItem(item)
+                                                }
+                                                aria-label={`Delete ${item.name}`}
+                                            >
+                                                <Trash2 className="size-3.5 text-[#040404]" />
+                                            </button>
+                                        )}
+                                        {!canEdit && !canDelete && (
+                                            <span className="text-[11px] font-medium text-[#040404]/45">
+                                                Read only
+                                            </span>
+                                        )}
                                     </div>
                                 </td>
                             </tr>

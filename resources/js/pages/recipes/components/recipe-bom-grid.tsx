@@ -66,11 +66,15 @@ export function RecipeBomGrid({
     filters,
     summary,
     onEdit,
+    canEdit,
+    canDelete,
 }: {
     recipes: PaginatedRecipes;
     filters: RecipeFilters;
     summary: RecipeSummary;
     onEdit: (recipe: RecipeBom) => void;
+    canEdit: boolean;
+    canDelete: boolean;
 }) {
     const deleteRecipe = (recipe: RecipeBom) => {
         if (!confirm(`Delete Recipe / BOM for ${recipe.name}?`)) {
@@ -161,22 +165,33 @@ export function RecipeBomGrid({
                                     </p>
                                 </div>
                                 <div className="flex gap-1">
-                                    <button
-                                        type="button"
-                                        className="inline-grid size-8 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
-                                        onClick={() => onEdit(recipe)}
-                                        aria-label={`Edit ${recipe.name}`}
-                                    >
-                                        <Pencil className="size-4" />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="inline-grid size-8 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
-                                        onClick={() => deleteRecipe(recipe)}
-                                        aria-label={`Delete ${recipe.name}`}
-                                    >
-                                        <Trash2 className="size-4" />
-                                    </button>
+                                    {canEdit && (
+                                        <button
+                                            type="button"
+                                            className="inline-grid size-8 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
+                                            onClick={() => onEdit(recipe)}
+                                            aria-label={`Edit ${recipe.name}`}
+                                        >
+                                            <Pencil className="size-4" />
+                                        </button>
+                                    )}
+                                    {canDelete && (
+                                        <button
+                                            type="button"
+                                            className="inline-grid size-8 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
+                                            onClick={() =>
+                                                deleteRecipe(recipe)
+                                            }
+                                            aria-label={`Delete ${recipe.name}`}
+                                        >
+                                            <Trash2 className="size-4" />
+                                        </button>
+                                    )}
+                                    {!canEdit && !canDelete && (
+                                        <span className="text-xs font-medium text-[#040404]/45">
+                                            Read only
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 

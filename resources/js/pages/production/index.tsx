@@ -1,8 +1,9 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { CookingPot, Plus } from 'lucide-react';
 import { useState  } from 'react';
 import type {ReactNode} from 'react';
 import AppLayout from '@/layouts/app-layout';
+import type { Permissions } from '@/types';
 import { ProductionBatchModal } from './components/production-batch-modal';
 import { ProductionFilters } from './components/production-filters';
 import { ProductionTable } from './components/production-table';
@@ -39,6 +40,9 @@ export default function ProductionIndex({
     categoryOptions,
     statusOptions,
 }: Props) {
+    const { permissions } = usePage().props as unknown as {
+        permissions: Permissions;
+    };
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedBatch, setSelectedBatch] = useState<ProductionBatch | null>(
         null,
@@ -90,6 +94,8 @@ export default function ProductionIndex({
                         filters={filters}
                         summary={summary}
                         onEdit={editBatch}
+                        canEdit={permissions.canEditOperationalRecords}
+                        canDelete={permissions.canDeleteOperationalRecords}
                     />
                 </div>
             </main>

@@ -108,29 +108,9 @@ const staffNavItems: NavItem[] = [
         icon: ReceiptText,
     },
     {
-        title: 'Sales',
-        href: '/admin/sales',
-        icon: TrendingUp,
-    },
-    {
-        title: 'Forecasting',
-        href: '/admin/forcasting',
-        icon: BarChart3,
-    },
-    {
-        title: 'Supplier',
-        href: '/admin/suppliers',
-        icon: Truck,
-    },
-    {
         title: 'Purchase Orders',
         href: '/admin/purchase-orders',
         icon: ShoppingBag,
-    },
-    {
-        title: 'Reports',
-        href: '/admin/report',
-        icon: ClipboardList,
     },
 ];
 

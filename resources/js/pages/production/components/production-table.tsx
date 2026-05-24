@@ -70,11 +70,15 @@ export function ProductionTable({
     filters,
     summary,
     onEdit,
+    canEdit,
+    canDelete,
 }: {
     batches: PaginatedProductionBatches;
     filters: ProductionFilters;
     summary: ProductionSummary;
     onEdit: (batch: ProductionBatch) => void;
+    canEdit: boolean;
+    canDelete: boolean;
 }) {
     const deleteBatch = (batch: ProductionBatch) => {
         if (!confirm(`Delete production batch ${batch.batch_number}?`)) {
@@ -330,22 +334,33 @@ export function ProductionTable({
                                 </td>
                                 <td className="px-2 py-1 text-right">
                                     <div className="flex justify-end gap-1">
-                                        <button
-                                            type="button"
-                                            className="inline-grid size-7 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
-                                            onClick={() => onEdit(batch)}
-                                            aria-label={`Edit ${batch.batch_number}`}
-                                        >
-                                            <Pencil className="size-3.5" />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="inline-grid size-7 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
-                                            onClick={() => deleteBatch(batch)}
-                                            aria-label={`Delete ${batch.batch_number}`}
-                                        >
-                                            <Trash2 className="size-3.5 text-[#040404]" />
-                                        </button>
+                                        {canEdit && (
+                                            <button
+                                                type="button"
+                                                className="inline-grid size-7 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
+                                                onClick={() => onEdit(batch)}
+                                                aria-label={`Edit ${batch.batch_number}`}
+                                            >
+                                                <Pencil className="size-3.5" />
+                                            </button>
+                                        )}
+                                        {canDelete && (
+                                            <button
+                                                type="button"
+                                                className="inline-grid size-7 place-items-center rounded border border-transparent text-[#040404] transition hover:border-[#faa340] hover:text-[#faa340]"
+                                                onClick={() =>
+                                                    deleteBatch(batch)
+                                                }
+                                                aria-label={`Delete ${batch.batch_number}`}
+                                            >
+                                                <Trash2 className="size-3.5 text-[#040404]" />
+                                            </button>
+                                        )}
+                                        {!canEdit && !canDelete && (
+                                            <span className="text-[11px] font-medium text-[#040404]/45">
+                                                Read only
+                                            </span>
+                                        )}
                                     </div>
                                 </td>
                             </tr>

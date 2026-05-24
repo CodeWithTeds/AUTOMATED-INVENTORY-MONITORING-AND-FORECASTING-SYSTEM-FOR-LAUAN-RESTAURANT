@@ -84,6 +84,7 @@ type Props = {
     forecastAlerts: ForecastAlert[];
     topSellingItems: Array<{ name: string; quantity: number; revenue: number }>;
     dateRangeLabel: string;
+    welcomeMessage: string;
 };
 
 const cardIcons = {
@@ -225,14 +226,12 @@ export default function Dashboard({
     forecastAlerts,
     topSellingItems,
     dateRangeLabel,
+    welcomeMessage,
 }: Props) {
     const { auth } = usePage().props as {
         auth: { user?: { name?: string; role?: string } | null };
     };
-    const firstName =
-        auth.user?.role === 'staff'
-            ? 'Staff'
-            : (auth.user?.name?.split(' ')[0] ?? 'Admin');
+    const firstName = auth.user?.name?.split(' ')[0] ?? 'Admin';
     const money = new Intl.NumberFormat('en-PH', {
         style: 'currency',
         currency: 'PHP',
@@ -329,7 +328,7 @@ export default function Dashboard({
                                     Welcome, {firstName}
                                 </h1>
                                 <p className="mt-1 text-base text-[#687280]">
-                                    You have{' '}
+                                    {welcomeMessage} You have{' '}
                                     <span className="font-semibold text-[#faa340]">
                                         {summary.today_orders}
                                     </span>{' '}

@@ -1,10 +1,11 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Download, PackageCheck, Search, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
+import type { Permissions } from '@/types';
 import type {
     PaginatedPurchaseOrders,
     PurchaseOrderFilters,
@@ -46,6 +47,9 @@ export default function PurchaseOrdersIndex({
     summary,
     statusOptions,
 }: Props) {
+    const { permissions } = usePage().props as unknown as {
+        permissions: Permissions;
+    };
     const [values, setValues] = useState({
         search: filters.search ?? '',
         status: filters.status ?? '',
@@ -185,26 +189,40 @@ export default function PurchaseOrdersIndex({
                                             {order.supplier_name}
                                         </td>
                                         <td className="px-3 py-2">
-                                            <select
-                                                value={order.status}
-                                                onChange={(event) =>
-                                                    updateStatus(
-                                                        order.id,
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                className={`h-8 rounded-md border px-2 text-xs font-semibold outline-none focus:border-[#faa340] focus:ring-3 focus:ring-[#faa340]/20 ${statusTone[order.status] ?? statusTone.pending}`}
-                                                aria-label={`Update status for ${order.order_number}`}
-                                            >
-                                                {statusOptions.map((option) => (
-                                                    <option
-                                                        key={option.value}
-                                                        value={option.value}
-                                                    >
-                                                        {option.label}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                            {permissions.canEditOperationalRecords ? (
+                                                <select
+                                                    value={order.status}
+                                                    onChange={(event) =>
+                                                        updateStatus(
+                                                            order.id,
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    className={`h-8 rounded-md border px-2 text-xs font-semibold outline-none focus:border-[#faa340] focus:ring-3 focus:ring-[#faa340]/20 ${statusTone[order.status] ?? statusTone.pending}`}
+                                                    aria-label={`Update status for ${order.order_number}`}
+                                                >
+                                                    {statusOptions.map(
+                                                        (option) => (
+                                                            <option
+                                                                key={
+                                                                    option.value
+                                                                }
+                                                                value={
+                                                                    option.value
+                                                                }
+                                                            >
+                                                                {option.label}
+                                                            </option>
+                                                        ),
+                                                    )}
+                                                </select>
+                                            ) : (
+                                                <span
+                                                    className={`inline-flex h-8 items-center rounded-md border px-2 text-xs font-semibold ${statusTone[order.status] ?? statusTone.pending}`}
+                                                >
+                                                    {order.status_label}
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-3 py-2 text-[#040404]/70">
                                             {order.items_count}

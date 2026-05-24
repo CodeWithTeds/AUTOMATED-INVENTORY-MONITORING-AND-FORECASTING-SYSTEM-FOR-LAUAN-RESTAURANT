@@ -1,8 +1,9 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Plus, ReceiptText } from 'lucide-react';
 import { useState  } from 'react';
 import type {ReactNode} from 'react';
 import AppLayout from '@/layouts/app-layout';
+import type { Permissions } from '@/types';
 import { RecipeBomFilters } from './components/recipe-bom-filters';
 import { RecipeBomGrid } from './components/recipe-bom-grid';
 import { RecipeBomModal } from './components/recipe-bom-modal';
@@ -34,6 +35,9 @@ export default function RecipeBomIndex({
     summary,
     rawMaterialOptions,
 }: Props) {
+    const { permissions } = usePage().props as unknown as {
+        permissions: Permissions;
+    };
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRecipe, setSelectedRecipe] = useState<RecipeBom | null>(
         null,
@@ -81,6 +85,8 @@ export default function RecipeBomIndex({
                         filters={filters}
                         summary={summary}
                         onEdit={editRecipe}
+                        canEdit={permissions.canEditOperationalRecords}
+                        canDelete={permissions.canDeleteOperationalRecords}
                     />
                 </div>
             </main>

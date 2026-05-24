@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Plus, Warehouse } from 'lucide-react';
 import { useState  } from 'react';
 import type {ReactNode} from 'react';
@@ -14,6 +14,7 @@ import type {
     PaginatedInventoryItems,
     SupplierOption,
 } from './types';
+import type { Permissions } from '@/types';
 
 type Props = {
     items: PaginatedInventoryItems;
@@ -41,6 +42,9 @@ export default function InventoryIndex({
     statusOptions,
     stockStateOptions,
 }: Props) {
+    const { permissions } = usePage().props as unknown as {
+        permissions: Permissions;
+    };
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(
         null,
@@ -93,6 +97,8 @@ export default function InventoryIndex({
                         filters={filters}
                         summary={summary}
                         onEdit={editItem}
+                        canEdit={permissions.canEditOperationalRecords}
+                        canDelete={permissions.canDeleteOperationalRecords}
                     />
                 </div>
             </main>

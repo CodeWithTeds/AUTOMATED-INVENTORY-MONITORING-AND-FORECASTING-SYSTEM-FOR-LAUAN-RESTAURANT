@@ -15,6 +15,12 @@ export type Auth = {
     user: User;
 };
 
+export type Permissions = {
+    canViewAdminOnlyPages: boolean;
+    canEditOperationalRecords: boolean;
+    canDeleteOperationalRecords: boolean;
+};
+
 export type TwoFactorSetupData = {
     svg: string;
     url: string;

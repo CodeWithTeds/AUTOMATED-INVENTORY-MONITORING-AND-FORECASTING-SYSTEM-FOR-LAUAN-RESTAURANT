@@ -6,6 +6,7 @@ import {
     Clock3,
     Download,
     ImageIcon,
+    KeyRound,
     Minus,
     PackageCheck,
     Plus,
@@ -28,6 +29,7 @@ import type {
     PosProduct,
     PosSummary,
     PurchaseOrder,
+    VoidOrderFormData,
 } from './types';
 
 type Props = {
@@ -88,6 +90,7 @@ function orderTone(index: number) {
 
 export default function PosIndex({
     products: initialProducts,
+    recentOrders,
     purchaseOrders,
     summary,
     paymentMethodOptions,
@@ -101,6 +104,7 @@ export default function PosIndex({
     const [dismissedReceiptNumber, setDismissedReceiptNumber] = useState('');
     const [dismissedToastKey, setDismissedToastKey] = useState('');
     const [lastSyncedAt, setLastSyncedAt] = useState(() => new Date());
+    const [voidOrder, setVoidOrder] = useState<PosOrder | null>(null);
     const firstPaymentMethod = paymentMethodOptions[0]?.value ?? 'cash';
     const { data, setData, post, processing, errors, clearErrors } =
         useForm<PosOrderFormData>({
@@ -109,6 +113,17 @@ export default function PosIndex({
             amount_paid: '',
             items: [],
         });
+    const {
+        data: voidData,
+        setData: setVoidData,
+        patch: patchVoid,
+        processing: voidProcessing,
+        errors: voidErrors,
+        reset: resetVoid,
+        clearErrors: clearVoidErrors,
+    } = useForm<VoidOrderFormData>({
+        admin_pin: '',
+    });
 
     const productById = useMemo(
         () => new Map(products.map((product) => [product.id, product])),
@@ -292,9 +307,107 @@ export default function PosIndex({
         });
     };
 
+    const openVoidPrompt = (order: PosOrder) => {
+        clearVoidErrors();
+        resetVoid();
+        setVoidOrder(order);
+    };
+
+    const closeVoidPrompt = () => {
+        setVoidOrder(null);
+        clearVoidErrors();
+        resetVoid();
+    };
+
+    const submitVoid = (event: FormEvent) => {
+        event.preventDefault();
+
+        if (!voidOrder) {
+            return;
+        }
+
+        patchVoid(`/admin/pos/orders/${voidOrder.id}/void`, {
+            preserveScroll: true,
+            onSuccess: closeVoidPrompt,
+        });
+    };
+
     return (
         <>
             <Head title="POS" />
+
+            {voidOrder && (
+                <div className="fixed inset-0 z-50 grid place-items-center bg-[#040404]/45 p-4">
+                    <form
+                        onSubmit={submitVoid}
+                        className="w-full max-w-sm rounded-lg bg-white p-5 text-[#040404] shadow-2xl"
+                    >
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <div className="grid size-10 place-items-center rounded-md bg-[#fff4e7] text-[#9a4b00]">
+                                    <KeyRound className="size-5" />
+                                </div>
+                                <h2 className="mt-3 text-lg font-semibold">
+                                    Admin PIN required
+                                </h2>
+                                <p className="mt-1 text-sm text-[#040404]/60">
+                                    Enter the admin PIN to void{' '}
+                                    {voidOrder.order_number}.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeVoidPrompt}
+                                className="grid size-8 place-items-center rounded-md text-[#040404]/45 transition hover:bg-[#f8f9fa] hover:text-[#040404]"
+                                aria-label="Cancel void transaction"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+
+                        <label className="mt-5 block">
+                            <span className="mb-1 block text-xs font-medium text-[#040404]/55">
+                                Admin PIN
+                            </span>
+                            <Input
+                                value={voidData.admin_pin}
+                                onChange={(event) =>
+                                    setVoidData(
+                                        'admin_pin',
+                                        event.target.value,
+                                    )
+                                }
+                                className="h-11 border-[#040404]/10 text-sm tracking-[0.24em] focus-visible:border-[#faa340] focus-visible:ring-[#faa340]/20"
+                                inputMode="numeric"
+                                type="password"
+                                autoFocus
+                            />
+                            {voidErrors.admin_pin && (
+                                <p className="mt-1 text-xs text-red-600">
+                                    {voidErrors.admin_pin}
+                                </p>
+                            )}
+                        </label>
+
+                        <div className="mt-5 grid grid-cols-2 gap-2">
+                            <button
+                                type="button"
+                                onClick={closeVoidPrompt}
+                                className="inline-flex h-10 items-center justify-center rounded-md border border-[#040404]/10 text-sm font-semibold text-[#040404]"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={voidProcessing}
+                                className="inline-flex h-10 items-center justify-center rounded-md bg-[#fb4856] text-sm font-semibold text-white transition hover:bg-[#dc3545] disabled:opacity-45"
+                            >
+                                {voidProcessing ? 'Voiding...' : 'Void'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
 
             {(toastMessage || receipt) && (
                 <div className="fixed top-4 right-4 z-50 w-[min(360px,calc(100vw-2rem))] space-y-3">
@@ -600,6 +713,64 @@ export default function PosIndex({
                                         </button>
                                     );
                                 })}
+                            </div>
+                        </section>
+
+                        <section className="mb-5">
+                            <div className="mb-3 flex items-center justify-between">
+                                <h2 className="text-xl font-semibold">
+                                    Recent Transactions
+                                </h2>
+                                <p className="text-sm text-[#040404]/45">
+                                    Admin PIN required to void
+                                </p>
+                            </div>
+                            <div className="grid gap-2">
+                                {recentOrders.map((order) => (
+                                    <article
+                                        key={order.id}
+                                        className="grid gap-3 rounded-md border border-[#040404]/10 bg-white p-3 sm:grid-cols-[minmax(0,1fr)_auto]"
+                                    >
+                                        <div className="min-w-0">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <p className="font-mono text-xs font-semibold text-[#040404]/70">
+                                                    {order.order_number}
+                                                </p>
+                                                <Badge className="border-0 bg-[#2ec66d] text-white hover:bg-[#2ec66d]">
+                                                    {order.status_label}
+                                                </Badge>
+                                            </div>
+                                            <p className="mt-1 truncate text-sm font-semibold">
+                                                {order.customer_name ??
+                                                    'Walk-in customer'}
+                                            </p>
+                                            <p className="mt-1 text-xs text-[#040404]/50">
+                                                {order.items.length} item
+                                                {order.items.length === 1
+                                                    ? ''
+                                                    : 's'}{' '}
+                                                • {order.paid_at ?? 'Today'} •{' '}
+                                                {money(order.total_amount)}
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                openVoidPrompt(order)
+                                            }
+                                            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-[#fb4856]/40 px-3 text-xs font-semibold text-[#fb4856] transition hover:bg-[#fb4856] hover:text-white"
+                                        >
+                                            <KeyRound className="size-3.5" />
+                                            Void
+                                        </button>
+                                    </article>
+                                ))}
+
+                                {recentOrders.length === 0 && (
+                                    <div className="rounded-md border border-dashed border-[#040404]/15 bg-white py-8 text-center text-sm text-[#040404]/50">
+                                        No paid transactions to void today.
+                                    </div>
+                                )}
                             </div>
                         </section>
 

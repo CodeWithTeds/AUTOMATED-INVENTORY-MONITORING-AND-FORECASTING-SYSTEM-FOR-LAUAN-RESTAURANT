@@ -31,6 +31,10 @@ interface PosOrderRepositoryInterface
      */
     public function createItems(PosOrder $order, array $items): void;
 
+    public function findPaidForVoid(int $id): PosOrder;
+
+    public function void(PosOrder $order, string $notes): bool;
+
     /**
      * @return Collection<int, PosOrder>
      */

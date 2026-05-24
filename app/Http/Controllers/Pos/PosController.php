@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Pos;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Pos\StorePosOrderRequest;
+use App\Http\Requests\Pos\VoidPosOrderRequest;
 use App\Http\Resources\PosOrderResource;
+use App\Models\PosOrder;
 use App\Services\Pos\PosOrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -34,5 +36,16 @@ class PosController extends Controller
         return back()
             ->with('success', 'Cash order completed. Receipt is ready and stock was deducted.')
             ->with('receipt', $receipt);
+    }
+
+    public function void(VoidPosOrderRequest $request, PosOrder $posOrder): RedirectResponse
+    {
+        $this->posOrderService->void(
+            $posOrder->id,
+            (string) $request->validated('admin_pin'),
+            (int) $request->user()->id,
+        );
+
+        return back()->with('success', 'POS transaction voided. Stock has been restored.');
     }
 }

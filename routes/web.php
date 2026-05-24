@@ -46,6 +46,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::post('pos/orders', [PosController::class, 'store'])
         ->middleware('throttle:30,1')
         ->name('pos.orders.store');
+    Route::patch('pos/orders/{posOrder}/void', [PosController::class, 'void'])
+        ->middleware('throttle:10,1')
+        ->name('pos.orders.void');
     Route::get('purchase-orders', [PurchaseOrderController::class, 'index'])
         ->name('purchase-orders.index');
     Route::patch('purchase-orders/{purchase_order}/status', [PurchaseOrderController::class, 'updateStatus'])

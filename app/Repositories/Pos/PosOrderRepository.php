@@ -68,6 +68,27 @@ class PosOrderRepository implements PosOrderRepositoryInterface
         $order->items()->createMany($items);
     }
 
+    public function findPaidForVoid(int $id): PosOrder
+    {
+        $order = PosOrder::query()
+            ->where('status', PosOrderStatus::Paid->value)
+            ->lockForUpdate()
+            ->findOrFail($id);
+
+        return $order->load('items.inventoryItem');
+    }
+
+    public function void(PosOrder $order, string $notes): bool
+    {
+        return $order->update([
+            'status' => PosOrderStatus::Voided,
+            'notes' => trim(implode(PHP_EOL, array_filter([
+                $order->notes,
+                $notes,
+            ]))),
+        ]);
+    }
+
     /**
      * @return Collection<int, PosOrder>
      */

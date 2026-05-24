@@ -84,3 +84,7 @@ export type PosOrderFormData = {
         quantity: number;
     }[];
 };
+
+export type VoidOrderFormData = {
+    admin_pin: string;
+};

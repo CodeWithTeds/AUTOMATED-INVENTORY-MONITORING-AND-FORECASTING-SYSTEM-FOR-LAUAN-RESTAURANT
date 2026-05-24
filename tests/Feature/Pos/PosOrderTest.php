@@ -10,6 +10,7 @@ use App\Models\InventoryItem;
 use App\Models\ProductionBatch;
 use App\Models\PurchaseOrder;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
 function posInventoryItem(array $attributes = []): InventoryItem
@@ -227,4 +228,70 @@ test('POS checkout accepts cash only', function (): void {
     expect((float) $menuItem->refresh()->current_stock)->toBe(3.0);
     $this->assertDatabaseCount('pos_orders', 0);
     $this->assertDatabaseCount('purchase_orders', 0);
+});
+
+test('POS transaction voids require a valid admin pin and restore stock', function (): void {
+    config(['auth.admin_pin' => '2468']);
+
+    $user = User::factory()->staff()->create();
+    $menuItem = posMenuItem([
+        'name' => 'Voidable Meal',
+        'sku' => 'POS-VOID-001',
+        'current_stock' => 5,
+        'selling_price' => 120,
+    ]);
+    completedPosProduction($menuItem, 5);
+
+    $this->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
+        ->post('/admin/pos/orders', [
+            '_token' => 'test-token',
+            'customer_name' => 'Void Check',
+            'payment_method' => PosPaymentMethod::Cash->value,
+            'amount_paid' => 300,
+            'items' => [
+                [
+                    'inventory_item_id' => $menuItem->id,
+                    'quantity' => 2,
+                ],
+            ],
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $orderId = (int) DB::table('pos_orders')
+        ->where('order_number', 'POS-'.now()->format('Ymd').'-0001')
+        ->value('id');
+
+    expect((float) $menuItem->refresh()->current_stock)->toBe(3.0);
+
+    $this->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
+        ->patch("/admin/pos/orders/{$orderId}/void", [
+            '_token' => 'test-token',
+            'admin_pin' => '0000',
+        ])
+        ->assertSessionHasErrors('admin_pin');
+
+    expect((float) $menuItem->refresh()->current_stock)->toBe(3.0);
+    $this->assertDatabaseHas('pos_orders', [
+        'id' => $orderId,
+        'status' => PosOrderStatus::Paid->value,
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
+        ->patch("/admin/pos/orders/{$orderId}/void", [
+            '_token' => 'test-token',
+            'admin_pin' => '2468',
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('success');
+
+    expect((float) $menuItem->refresh()->current_stock)->toBe(5.0);
+    $this->assertDatabaseHas('pos_orders', [
+        'id' => $orderId,
+        'status' => PosOrderStatus::Voided->value,
+    ]);
 });

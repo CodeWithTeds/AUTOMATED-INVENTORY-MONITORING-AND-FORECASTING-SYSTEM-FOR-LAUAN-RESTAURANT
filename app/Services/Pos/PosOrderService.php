@@ -132,6 +132,31 @@ class PosOrderService
         });
     }
 
+    public function void(int $orderId, string $adminPin, int $userId): PosOrder
+    {
+        $this->ensureValidAdminPin($adminPin);
+
+        return DB::transaction(function () use ($orderId, $userId): PosOrder {
+            $order = $this->posOrderRepository->findPaidForVoid($orderId);
+
+            foreach ($order->items as $item) {
+                if ($item->inventoryItem instanceof InventoryItem) {
+                    $this->inventoryItemRepository->adjustCurrentStock(
+                        $item->inventoryItem,
+                        (float) $item->quantity,
+                    );
+                }
+            }
+
+            $this->posOrderRepository->void(
+                $order,
+                'Voided by user #'.$userId.' on '.now()->format('Y-m-d H:i:s').'.',
+            );
+
+            return $order->refresh()->load(['items', 'cashier:id,name']);
+        });
+    }
+
     /**
      * @return array<int, array{value: string, label: string}>
      */
@@ -143,5 +168,22 @@ class PosOrderService
                 'label' => PosPaymentMethod::Cash->label(),
             ],
         ];
+    }
+
+    private function ensureValidAdminPin(string $adminPin): void
+    {
+        $configuredPin = config('auth.admin_pin');
+
+        if (! is_string($configuredPin) || $configuredPin === '') {
+            throw ValidationException::withMessages([
+                'admin_pin' => 'The POS admin PIN is not configured.',
+            ]);
+        }
+
+        if (! hash_equals($configuredPin, $adminPin)) {
+            throw ValidationException::withMessages([
+                'admin_pin' => 'The admin PIN is invalid.',
+            ]);
+        }
     }
 }

@@ -21,7 +21,5 @@ class DatabaseSeeder extends Seeder
             'password' => env('DEFAULT_ADMIN_PASSWORD', 'password'),
         ]);
 
-        $this->call(InventoryItemSeeder::class);
-        $this->call(LauanProductionMenuSeeder::class);
     }
 }

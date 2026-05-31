@@ -38,7 +38,13 @@ class SupplierRepository implements SupplierRepositoryInterface
                 return max($highest, (int) $matches[1]);
             }, 0);
 
-        return sprintf('SUP-%03d', $latestNumber + 1);
+        // Keep incrementing until we find an unused code
+        do {
+            $latestNumber++;
+            $code = sprintf('SUP-%03d', $latestNumber);
+        } while (Supplier::query()->where('code', $code)->exists());
+
+        return $code;
     }
 
     /**

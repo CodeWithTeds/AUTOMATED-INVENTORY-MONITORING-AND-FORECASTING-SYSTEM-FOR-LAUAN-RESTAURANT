@@ -10,6 +10,7 @@ use App\Http\Requests\Supplier\UpdateSupplierRequest;
 use App\Http\Resources\SupplierResource;
 use App\Repositories\Supplier\SupplierRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -38,11 +39,16 @@ class SupplierController extends Controller
     public function store(StoreSupplierRequest $request): RedirectResponse
     {
         $attributes = $request->validated();
-        $attributes['code'] = empty($attributes['code'])
-            ? $this->suppliers->nextCode()
-            : $attributes['code'];
 
-        $this->suppliers->create($attributes);
+        if (empty($attributes['code'])) {
+            $attributes['code'] = $this->suppliers->nextCode();
+        }
+
+        try {
+            $this->suppliers->create($attributes);
+        } catch (UniqueConstraintViolationException) {
+            return back()->withErrors(['code' => 'This supplier code already exists. Please use a different code or leave blank to auto-generate.'])->withInput();
+        }
 
         return back()->with('success', 'Supplier created successfully.');
     }

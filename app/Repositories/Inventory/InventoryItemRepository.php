@@ -81,7 +81,13 @@ class InventoryItemRepository implements InventoryItemRepositoryInterface
                 return max($highest, (int) $matches[1]);
             }, 0);
 
-        return sprintf('LR-%s-%03d', $normalizedPrefix, $latestNumber + 1);
+        // Keep incrementing until we find an unused SKU
+        do {
+            $latestNumber++;
+            $sku = sprintf('LR-%s-%03d', $normalizedPrefix, $latestNumber);
+        } while (InventoryItem::query()->where('sku', $sku)->exists());
+
+        return $sku;
     }
 
     /**

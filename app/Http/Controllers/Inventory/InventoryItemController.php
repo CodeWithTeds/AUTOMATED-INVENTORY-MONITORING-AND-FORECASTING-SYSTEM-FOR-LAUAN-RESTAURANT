@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\StoreInventoryItemRequest;
 use App\Http\Requests\Inventory\UpdateInventoryItemRequest;
 use App\Services\Inventory\InventoryItemService;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,7 +23,11 @@ class InventoryItemController extends Controller
 
     public function store(StoreInventoryItemRequest $request): RedirectResponse
     {
-        $this->inventoryItemService->create($request->validated());
+        try {
+            $this->inventoryItemService->create($request->validated());
+        } catch (UniqueConstraintViolationException) {
+            return back()->withErrors(['sku' => 'This SKU already exists. Please use a different SKU or leave blank to auto-generate.'])->withInput();
+        }
 
         return back()->with('success', 'Inventory product created successfully.');
     }

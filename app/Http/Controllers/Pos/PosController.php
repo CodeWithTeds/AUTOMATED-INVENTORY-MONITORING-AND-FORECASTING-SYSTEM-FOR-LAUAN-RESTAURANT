@@ -46,6 +46,6 @@ class PosController extends Controller
             (int) $request->user()->id,
         );
 
-        return back()->with('success', 'POS transaction voided. Stock has been restored.');
+        return redirect()->route('pos.index')->with('success', 'POS transaction voided. Stock has been restored.');
     }
 }

@@ -171,10 +171,6 @@ export function InventoryTable({
                                     filters={filters}
                                 />
                             </th>
-                            <th className="px-2 py-1.5">Start</th>
-                            <th className="px-2 py-1.5">In</th>
-                            <th className="px-2 py-1.5">Out</th>
-                            <th className="px-2 py-1.5">End</th>
                             <th className="px-2 py-1.5">Par</th>
                             <th className="px-2 py-1.5">Reorder</th>
                             <th className="px-2 py-1.5">Forecast</th>
@@ -240,18 +236,6 @@ export function InventoryTable({
                                     >
                                         {item.current_stock} {item.unit}
                                     </Badge>
-                                </td>
-                                <td className="px-2 py-1 text-[#040404]/70">
-                                    {item.starting_stock}
-                                </td>
-                                <td className="px-2 py-1 text-[#040404]/70">
-                                    {item.stock_in}
-                                </td>
-                                <td className="px-2 py-1 text-[#040404]/70">
-                                    {item.stock_out}
-                                </td>
-                                <td className="px-2 py-1 text-[#040404]/70">
-                                    {item.ending_stock}
                                 </td>
                                 <td className="px-2 py-1 text-[#040404]/70">
                                     {item.par_level}
@@ -323,7 +307,7 @@ export function InventoryTable({
                         {items.data.length === 0 && (
                             <tr>
                                 <td
-                                    colSpan={19}
+                                    colSpan={15}
                                     className="px-4 py-14 text-center text-[#040404]/60"
                                 >
                                     No products match the current filters.

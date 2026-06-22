@@ -137,8 +137,8 @@ export function InventoryTable({
             </div>
 
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[1420px] text-left text-xs">
-                    <thead className="text-xs text-[#040404]/65 uppercase">
+                <table className="w-full min-w-[1420px] text-left text-sm">
+                    <thead className="text-sm text-[#040404]/65 uppercase">
                         <tr className="border-b border-[#040404]/10">
                             <th className="w-10 px-2 py-1.5">Img</th>
                             <th className="px-2 py-1.5">
